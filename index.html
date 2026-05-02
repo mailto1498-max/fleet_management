@@ -12,9 +12,16 @@
      1. Go to https://supabase.com → New Project
      2. Settings → API → copy "Project URL" and "anon public" key
      ════════════════════════════════════════════════════════════════ -->
+<!-- Load the Supabase Library first -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script>
-  const SUPABASE_URL = 'https://kfwcytlsqrhbzirhfyyy.supabase.co';   // ← replace
-  const SUPABASE_KEY = 'sb_publishable_yJm2R6Mu9rLZ9s-znCpLQw_NrSL15FO';                  // ← replace
+  // STEP 1: Supabase Configuration
+  const SUPABASE_URL = 'https://kfwcytlsqrhbzirhfyyy.supabase.com';
+  const SUPABASE_KEY = 'sb_publishable_yJm2R6Mu9rLZ9s-znCpLQw_NrSL15FO';
+  
+  // STEP 2: Initialize the Client
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 </script>
 
 <!-- Supabase JS SDK (CDN) -->
