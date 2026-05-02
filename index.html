@@ -5,6 +5,21 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>FleetDesk — Fleet Management System</title>
 <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<!-- ════════════════════════════════════════════════════════════════
+     STEP 1: Replace the two values below with your Supabase project
+     ─────────────────────────────────────────────────────────────
+     1. Go to https://supabase.com → New Project
+     2. Settings → API → copy "Project URL" and "anon public" key
+     ════════════════════════════════════════════════════════════════ -->
+<script>
+  const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';   // ← replace
+  const SUPABASE_KEY = 'YOUR_ANON_PUBLIC_KEY';                  // ← replace
+</script>
+
+<!-- Supabase JS SDK (CDN) -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 :root{--bg:#f0f2f7;--glass:rgba(255,255,255,0.72);--glass-border:rgba(255,255,255,0.9);--card-shadow:0 4px 24px rgba(99,115,170,0.11),0 1px 4px rgba(99,115,170,0.07);--sidebar-bg:linear-gradient(160deg,#1a2448 0%,#223068 60%,#1e3a6e 100%);--accent:#4f72e3;--accent2:#6c8ff5;--accent-grad:linear-gradient(135deg,#4f72e3 0%,#7c9ff7 100%);--danger:#e05c6a;--danger-grad:linear-gradient(135deg,#e05c6a 0%,#f07a85 100%);--success:#3dbf8a;--success-grad:linear-gradient(135deg,#3dbf8a 0%,#5dd4a2 100%);--text-primary:#1a2448;--text-secondary:#6b7a9e;--text-muted:#9aa3be;--text-light:rgba(255,255,255,0.92);--text-light2:rgba(255,255,255,0.55);--border:rgba(99,115,170,0.13);--radius:16px;--radius-pill:999px}
 *{box-sizing:border-box;margin:0;padding:0}
@@ -21,7 +36,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh}
 .logo-sub{font-size:11px;color:var(--text-light2);margin-top:2px}
 .nav-section{padding:.6rem 0;overflow-y:auto;flex:1}
 .nav-label{font-size:9px;font-weight:600;color:var(--text-light2);letter-spacing:1.5px;text-transform:uppercase;padding:.5rem 1.4rem .3rem}
-.nav{display:flex;align-items:center;gap:10px;padding:10px 1.2rem 10px 1.4rem;font-size:13px;color:var(--text-light2);cursor:pointer;border-radius:10px;margin:1px 10px;transition:all .2s;position:relative}
+.nav{display:flex;align-items:center;gap:10px;padding:10px 1.2rem 10px 1.4rem;font-size:13px;color:var(--text-light2);cursor:pointer;border-radius:10px;margin:1px 10px;transition:all .2s}
 .nav:hover{background:rgba(255,255,255,0.08);color:var(--text-light)}
 .nav.active{background:rgba(255,255,255,0.14);color:#fff;font-weight:500;box-shadow:inset 0 0 0 1px rgba(255,255,255,0.12)}
 .nav-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:rgba(255,255,255,0.07);font-size:14px}
@@ -42,8 +57,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);min-height:100vh}
 .main{flex:1;overflow-y:auto;padding:2rem 2rem 2rem 1.75rem;position:relative;z-index:1}
 .ptitle{font-family:'Outfit',sans-serif;font-size:24px;font-weight:700;color:var(--text-primary);margin-bottom:.3rem;letter-spacing:-.3px}
 .psubtitle{font-size:13px;color:var(--text-secondary);margin-bottom:1.75rem}
-.page{display:none}.page.active{display:block;animation:fadeUp .3s ease}
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeUp .3s ease}
 .glass-card{background:var(--glass);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border:1px solid var(--glass-border);border-radius:var(--radius);box-shadow:var(--card-shadow);padding:1.5rem;margin-bottom:1.25rem}
 .ctitle{font-family:'Outfit',sans-serif;font-size:14px;font-weight:600;color:var(--text-primary);margin-bottom:1.1rem}
 .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:1.5rem}
@@ -83,7 +98,7 @@ input::placeholder{color:var(--text-muted)}
 .tbl td{padding:11px 12px;border-bottom:1px solid rgba(99,115,170,0.07);color:var(--text-primary);vertical-align:middle}
 .tbl tr:last-child td{border-bottom:none}
 .tbl tr:hover td{background:rgba(79,114,227,0.03)}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,36,72,0.35);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);align-items:center;justify-content:center;z-index:1000}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(26,36,72,0.35);backdrop-filter:blur(6px);align-items:center;justify-content:center;z-index:1000}
 .modal-overlay.open{display:flex}
 .modal{background:rgba(255,255,255,0.97);border-radius:20px;padding:1.75rem;width:420px;border:1px solid var(--glass-border);box-shadow:0 24px 64px rgba(26,36,72,0.22);animation:modalIn .25s ease;max-height:90vh;overflow-y:auto}
 @keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
@@ -92,14 +107,12 @@ input::placeholder{color:var(--text-muted)}
 .login-wrap{display:flex;align-items:center;justify-content:center;min-height:100vh;background:linear-gradient(135deg,#e8ebf5 0%,#dde3f5 100%);position:relative;overflow:hidden}
 .login-wrap::before{content:'';position:absolute;width:600px;height:600px;background:radial-gradient(circle,rgba(79,114,227,0.12) 0%,transparent 65%);top:-200px;right:-150px}
 .login-wrap::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(61,191,138,0.10) 0%,transparent 65%);bottom:-100px;left:-50px}
-.login-box{background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:24px;padding:2.5rem 2.25rem;width:380px;box-shadow:0 24px 64px rgba(26,36,72,0.16);position:relative;z-index:1}
+.login-box{background:var(--glass);backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:24px;padding:2.5rem 2.25rem;width:380px;box-shadow:0 24px 64px rgba(26,36,72,0.16);position:relative;z-index:1}
 .login-logo{width:52px;height:52px;background:var(--accent-grad);border-radius:14px;display:flex;align-items:center;justify-content:center;margin-bottom:1.2rem;box-shadow:0 8px 24px rgba(79,114,227,0.35)}
 .login-logo svg{width:28px;height:28px;fill:white}
 .login-title{font-family:'Outfit',sans-serif;font-size:24px;font-weight:700;color:var(--text-primary);margin-bottom:.25rem}
 .login-sub{font-size:13px;color:var(--text-secondary);margin-bottom:1.8rem}
 .login-err{font-size:12px;color:var(--danger);margin-top:8px;display:none;background:rgba(224,92,106,0.08);padding:8px 12px;border-radius:8px;border:1px solid rgba(224,92,106,0.2)}
-.cred-box{background:rgba(79,114,227,0.06);border:1px solid rgba(79,114,227,0.15);border-radius:12px;padding:.9rem 1rem;margin-top:1.2rem;font-size:11px;color:var(--text-secondary);line-height:2}
-.cred-box code{background:rgba(79,114,227,0.1);color:var(--accent);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:11px}
 .search-wrap{position:relative;margin-bottom:14px}
 .search-wrap input{padding-left:36px;background:rgba(255,255,255,0.9)}
 .search-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;pointer-events:none;color:var(--text-muted)}
@@ -122,7 +135,7 @@ input::placeholder{color:var(--text-muted)}
 .trip-row:last-child{border-bottom:none}
 .info-box{background:rgba(79,114,227,0.07);border:1px solid rgba(79,114,227,0.18);border-radius:10px;padding:.7rem 1rem;font-size:12px;color:var(--accent);margin-bottom:12px;font-weight:500}
 .warn-box{font-size:11px;color:var(--danger);margin-top:-6px;margin-bottom:10px;display:none;background:rgba(224,92,106,0.07);padding:7px 10px;border-radius:8px;border:1px solid rgba(224,92,106,0.2)}
-.chip{display:inline-flex;align-items:center;font-size:10px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);background:rgba(79,114,227,0.1);color:var(--accent);letter-spacing:.5px;text-transform:uppercase;margin-left:6px}
+.chip{display:inline-flex;font-size:10px;font-weight:700;padding:3px 10px;border-radius:var(--radius-pill);background:rgba(79,114,227,0.1);color:var(--accent);letter-spacing:.5px;text-transform:uppercase;margin-left:6px}
 .section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
 .empty-state{text-align:center;padding:2rem;color:var(--text-secondary)}
 .empty-state .icon{font-size:32px;margin-bottom:.5rem}
@@ -141,6 +154,13 @@ input::placeholder{color:var(--text-muted)}
 .cred-tag{display:inline-flex;align-items:center;gap:4px;background:rgba(79,114,227,0.08);border:1px solid rgba(79,114,227,0.18);border-radius:7px;padding:3px 8px;font-size:10px;color:var(--accent);font-family:monospace}
 .time-range-badge{display:inline-flex;align-items:center;gap:4px;background:rgba(61,191,138,0.1);border:1px solid rgba(61,191,138,0.2);border-radius:6px;padding:2px 8px;font-size:10px;font-weight:600;color:#27936a}
 .no-results{text-align:center;padding:1.5rem;color:var(--text-muted);font-size:12px}
+.loading-screen{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;background:var(--bg)}
+.spinner{width:40px;height:40px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.setup-box{background:var(--glass);backdrop-filter:blur(24px);border:1px solid var(--glass-border);border-radius:24px;padding:2.5rem;width:460px;box-shadow:0 24px 64px rgba(26,36,72,0.16)}
+.setup-step{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;font-size:13px;color:var(--text-secondary);line-height:1.6}
+.step-num{width:24px;height:24px;border-radius:50%;background:var(--accent-grad);color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px}
+code{background:rgba(79,114,227,0.1);color:var(--accent);padding:2px 7px;border-radius:5px;font-family:monospace;font-size:12px}
 select option.unavailable{color:var(--danger);font-weight:600}
 select option.available{color:#27936a}
 </style>
@@ -148,27 +168,174 @@ select option.available{color:#27936a}
 <body>
 <div id="root"></div>
 <div id="toast" class="toast"></div>
+
 <script>
-// ── DATA ──────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════
+//  SUPABASE SETUP & DATABASE LAYER
+// ══════════════════════════════════════════════════════════════════
+
+// Initialize Supabase client
+let sb = null;
+let useSupabase = false;
+
+function initSupabase() {
+  try {
+    if (SUPABASE_URL === 'https://YOUR_PROJECT_ID.supabase.co' || SUPABASE_KEY === 'YOUR_ANON_PUBLIC_KEY') {
+      console.warn('FleetDesk: Supabase not configured — running in local demo mode.');
+      useSupabase = false;
+      return false;
+    }
+    sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    useSupabase = true;
+    return true;
+  } catch(e) {
+    console.error('Supabase init failed:', e);
+    useSupabase = false;
+    return false;
+  }
+}
+
+// ── DATABASE SCHEMA (run once in Supabase SQL Editor) ─────────────
+// Copy-paste the SQL below into Supabase → SQL Editor → Run
+/*
+────────────────────────────────────────────────────────────────────
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  role TEXT NOT NULL CHECK (role IN ('admin','driver','employee')),
+  display_name TEXT NOT NULL,
+  emp_id TEXT,
+  driver_id INTEGER
+);
+
+CREATE TABLE drivers (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  license TEXT NOT NULL,
+  phone TEXT NOT NULL
+);
+
+CREATE TABLE employees (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  emp_id TEXT UNIQUE NOT NULL,
+  dept TEXT,
+  phone TEXT
+);
+
+CREATE TABLE cars (
+  id SERIAL PRIMARY KEY,
+  reg TEXT UNIQUE NOT NULL,
+  model TEXT NOT NULL,
+  color TEXT NOT NULL,
+  hex TEXT NOT NULL
+);
+
+CREATE TABLE requests (
+  id SERIAL PRIMARY KEY,
+  emp_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  dept TEXT,
+  phone TEXT,
+  from_loc TEXT NOT NULL,
+  to_loc TEXT NOT NULL,
+  date DATE NOT NULL,
+  pickup_time TEXT NOT NULL,
+  drop_time TEXT NOT NULL,
+  notes TEXT,
+  status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','assigned','completed','declined')),
+  driver TEXT,
+  car TEXT,
+  est_km INTEGER DEFAULT 0,
+  actual_km INTEGER DEFAULT 0,
+  end_time TEXT,
+  driver_notes TEXT,
+  decline_reason TEXT,
+  month TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Insert default admin account (change password after first login!)
+INSERT INTO users (username, password, role, display_name) VALUES ('admin','admin123','admin','Admin');
+────────────────────────────────────────────────────────────────────
+*/
+
+// ── DB ABSTRACTION LAYER ──────────────────────────────────────────
+// All data operations route through here — works with both
+// Supabase (live) and local arrays (demo mode).
+
+async function dbGetUsers()     { if(!useSupabase) return USERS; const {data}=await sb.from('users').select('*'); return data||[]; }
+async function dbGetDrivers()   { if(!useSupabase) return drivers; const {data}=await sb.from('drivers').select('*').order('name'); return data||[]; }
+async function dbGetEmployees() { if(!useSupabase) return employees; const {data}=await sb.from('employees').select('*').order('name'); return data||[]; }
+async function dbGetCars()      { if(!useSupabase) return cars; const {data}=await sb.from('cars').select('*').order('model'); return data||[]; }
+async function dbGetRequests()  { if(!useSupabase) return requests; const {data}=await sb.from('requests').select('*').order('created_at',{ascending:false}); return data||[]; }
+
+async function dbInsertDriver(d)   { if(!useSupabase){var nd={...d,id:nextDriverId++};drivers.push(nd);return nd;} const {data}=await sb.from('drivers').insert(d).select().single(); return data; }
+async function dbInsertEmployee(e) { if(!useSupabase){var ne={...e,id:nextEmpId++};employees.push(ne);return ne;} const {data}=await sb.from('employees').insert(e).select().single(); return data; }
+async function dbInsertCar(c)      { if(!useSupabase){var nc={...c,id:nextCarId++};cars.push(nc);return nc;} const {data}=await sb.from('cars').insert(c).select().single(); return data; }
+async function dbInsertRequest(r)  { if(!useSupabase){var nr={...r,id:requests.length+1};requests.push(nr);return nr;} const {data}=await sb.from('requests').insert(r).select().single(); return data; }
+async function dbInsertUser(u)     { if(!useSupabase){USERS.push({...u,id:'u'+nextUserId++});return u;} const {data}=await sb.from('users').insert(u).select().single(); return data; }
+
+async function dbUpdateRequest(id,updates) {
+  if(!useSupabase){var r=requests.find(x=>x.id===id);if(r)Object.assign(r,updates);return r;}
+  const {data}=await sb.from('requests').update(updates).eq('id',id).select().single(); return data;
+}
+async function dbUpdateUser(id,updates) {
+  if(!useSupabase){var u=USERS.find(x=>x.id===id);if(u)Object.assign(u,updates);return u;}
+  const {data}=await sb.from('users').update(updates).eq('id',id).select().single(); return data;
+}
+async function dbUpsertUser(matchField,matchVal,userData) {
+  if(!useSupabase){
+    var u=USERS.find(x=>x[matchField]===matchVal);
+    if(u){Object.assign(u,userData);}else{USERS.push({id:'u'+nextUserId++,...userData});}
+    return userData;
+  }
+  const {data}=await sb.from('users').upsert(userData,{onConflict:'username'}).select().single(); return data;
+}
+async function dbDeleteDriver(id)   { if(!useSupabase){drivers=drivers.filter(d=>d.id!==id);USERS=USERS.filter(u=>(u.driver_id||u.driverId)!==id);return;} await sb.from('drivers').delete().eq('id',id); await sb.from('users').delete().eq('driver_id',id); }
+async function dbDeleteEmployee(id) {
+  if(!useSupabase){
+    var e=employees.find(x=>x.id===id);
+    employees=employees.filter(x=>x.id!==id);
+    if(e)USERS=USERS.filter(u=>(u.emp_id||u.empId)!==(e.emp_id||e.empId));
+    return;
+  }
+  const e=employees.find(x=>x.id===id);
+  await sb.from('employees').delete().eq('id',id);
+  if(e) await sb.from('users').delete().eq('emp_id',e.emp_id||e.empId);
+}
+async function dbDeleteCar(id) { if(!useSupabase){cars=cars.filter(c=>c.id!==id);return;} await sb.from('cars').delete().eq('id',id); }
+
+// Authenticate user against DB
+async function dbAuthUser(username, password) {
+  if(!useSupabase) {
+    return USERS.find(u=>u.username===username&&u.password===password)||null;
+  }
+  const {data}=await sb.from('users').select('*').eq('username',username).eq('password',password).single();
+  return data||null;
+}
+
+// ── LOCAL FALLBACK DATA (used when Supabase not configured) ────────
 var USERS=[
-  {id:'u0', username:'admin',   password:'admin123', role:'admin',    displayName:'Admin',           empId:null,       driverId:null},
-  {id:'u1', username:'rahul',   password:'driver1',  role:'driver',   displayName:'Rahul Sharma',    empId:null,       driverId:1},
-  {id:'u2', username:'amit',    password:'driver2',  role:'driver',   displayName:'Amit Patil',      empId:null,       driverId:2},
-  {id:'u3', username:'sandeep', password:'driver3',  role:'driver',   displayName:'Sandeep Deshmukh',empId:null,       driverId:3},
-  {id:'u4', username:'priya_k', password:'driver4',  role:'driver',   displayName:'Priya Kulkarni',  empId:null,       driverId:4},
-  {id:'u5', username:'vijay',   password:'driver5',  role:'driver',   displayName:'Vijay Chauhan',   empId:null,       driverId:5},
-  {id:'u6', username:'snehal',  password:'driver6',  role:'driver',   displayName:'Snehal More',     empId:null,       driverId:6},
-  {id:'u7', username:'rajesh',  password:'driver7',  role:'driver',   displayName:'Rajesh Pawar',    empId:null,       driverId:7},
-  {id:'u8', username:'anjali',  password:'driver8',  role:'driver',   displayName:'Anjali Gadkari',  empId:null,       driverId:8},
-  {id:'u9', username:'vikram',  password:'driver9',  role:'driver',   displayName:'Vikram Singh',    empId:null,       driverId:9},
-  {id:'u10',username:'mahesh',  password:'driver10', role:'driver',   displayName:'Mahesh Joshi',    empId:null,       driverId:10},
-  {id:'u11',username:'deepak',  password:'driver11', role:'driver',   displayName:'Deepak Shinde',   empId:null,       driverId:11},
-  {id:'u12',username:'karan',   password:'driver12', role:'driver',   displayName:'Karan Malhotra',  empId:null,       driverId:12},
-  {id:'u13',username:'anita',   password:'emp001',   role:'employee', displayName:'Anita Desai',     empId:'EMP-0011', driverId:null},
-  {id:'u14',username:'sunil',   password:'emp002',   role:'employee', displayName:'Sunil Mehta',     empId:'EMP-0023', driverId:null},
-  {id:'u15',username:'priya_n', password:'emp003',   role:'employee', displayName:'Priya Nair',      empId:'EMP-0034', driverId:null},
-  {id:'u16',username:'ravi',    password:'emp004',   role:'employee', displayName:'Ravi Kumar',      empId:'EMP-0042', driverId:null},
-  {id:'u17',username:'kavya',   password:'emp005',   role:'employee', displayName:'Kavya Reddy',     empId:'EMP-0015', driverId:null},
+  {id:'u0', username:'admin',   password:'admin123', role:'admin',    displayName:'Admin',          display_name:'Admin',          empId:null, emp_id:null, driverId:null, driver_id:null},
+  {id:'u1', username:'rahul',   password:'driver1',  role:'driver',   displayName:'Rahul Sharma',   display_name:'Rahul Sharma',   empId:null, emp_id:null, driverId:1,    driver_id:1},
+  {id:'u2', username:'amit',    password:'driver2',  role:'driver',   displayName:'Amit Patil',     display_name:'Amit Patil',     empId:null, emp_id:null, driverId:2,    driver_id:2},
+  {id:'u3', username:'sandeep', password:'driver3',  role:'driver',   displayName:'Sandeep Deshmukh',display_name:'Sandeep Deshmukh',empId:null,emp_id:null, driverId:3,    driver_id:3},
+  {id:'u4', username:'priya_k', password:'driver4',  role:'driver',   displayName:'Priya Kulkarni', display_name:'Priya Kulkarni', empId:null, emp_id:null, driverId:4,    driver_id:4},
+  {id:'u5', username:'vijay',   password:'driver5',  role:'driver',   displayName:'Vijay Chauhan',  display_name:'Vijay Chauhan',  empId:null, emp_id:null, driverId:5,    driver_id:5},
+  {id:'u6', username:'snehal',  password:'driver6',  role:'driver',   displayName:'Snehal More',    display_name:'Snehal More',    empId:null, emp_id:null, driverId:6,    driver_id:6},
+  {id:'u7', username:'rajesh',  password:'driver7',  role:'driver',   displayName:'Rajesh Pawar',   display_name:'Rajesh Pawar',   empId:null, emp_id:null, driverId:7,    driver_id:7},
+  {id:'u8', username:'anjali',  password:'driver8',  role:'driver',   displayName:'Anjali Gadkari', display_name:'Anjali Gadkari', empId:null, emp_id:null, driverId:8,    driver_id:8},
+  {id:'u9', username:'vikram',  password:'driver9',  role:'driver',   displayName:'Vikram Singh',   display_name:'Vikram Singh',   empId:null, emp_id:null, driverId:9,    driver_id:9},
+  {id:'u10',username:'mahesh',  password:'driver10', role:'driver',   displayName:'Mahesh Joshi',   display_name:'Mahesh Joshi',   empId:null, emp_id:null, driverId:10,   driver_id:10},
+  {id:'u11',username:'deepak',  password:'driver11', role:'driver',   displayName:'Deepak Shinde',  display_name:'Deepak Shinde',  empId:null, emp_id:null, driverId:11,   driver_id:11},
+  {id:'u12',username:'karan',   password:'driver12', role:'driver',   displayName:'Karan Malhotra', display_name:'Karan Malhotra', empId:null, emp_id:null, driverId:12,   driver_id:12},
+  {id:'u13',username:'anita',   password:'emp001',   role:'employee', displayName:'Anita Desai',    display_name:'Anita Desai',    empId:'EMP-0011',emp_id:'EMP-0011',driverId:null,driver_id:null},
+  {id:'u14',username:'sunil',   password:'emp002',   role:'employee', displayName:'Sunil Mehta',    display_name:'Sunil Mehta',    empId:'EMP-0023',emp_id:'EMP-0023',driverId:null,driver_id:null},
+  {id:'u15',username:'priya_n', password:'emp003',   role:'employee', displayName:'Priya Nair',     display_name:'Priya Nair',     empId:'EMP-0034',emp_id:'EMP-0034',driverId:null,driver_id:null},
+  {id:'u16',username:'ravi',    password:'emp004',   role:'employee', displayName:'Ravi Kumar',     display_name:'Ravi Kumar',     empId:'EMP-0042',emp_id:'EMP-0042',driverId:null,driver_id:null},
+  {id:'u17',username:'kavya',   password:'emp005',   role:'employee', displayName:'Kavya Reddy',    display_name:'Kavya Reddy',    empId:'EMP-0015',emp_id:'EMP-0015',driverId:null,driver_id:null},
 ];
 var drivers=[
   {id:1, name:'Rahul Sharma',    license:'MH14 20180054321',phone:'+91 98220 12345'},
@@ -185,11 +352,11 @@ var drivers=[
   {id:12,name:'Karan Malhotra',  license:'DL01 20210099887',phone:'+91 98100 11223'},
 ];
 var employees=[
-  {id:1,name:'Anita Desai', empId:'EMP-0011',dept:'HR',        phone:'9876540001'},
-  {id:2,name:'Sunil Mehta', empId:'EMP-0023',dept:'Sales',     phone:'9876540002'},
-  {id:3,name:'Priya Nair',  empId:'EMP-0034',dept:'Finance',   phone:'9876540003'},
-  {id:4,name:'Ravi Kumar',  empId:'EMP-0042',dept:'IT',        phone:'9876540004'},
-  {id:5,name:'Kavya Reddy', empId:'EMP-0015',dept:'Marketing', phone:'9876540005'},
+  {id:1,name:'Anita Desai', emp_id:'EMP-0011',empId:'EMP-0011',dept:'HR',        phone:'9876540001'},
+  {id:2,name:'Sunil Mehta', emp_id:'EMP-0023',empId:'EMP-0023',dept:'Sales',     phone:'9876540002'},
+  {id:3,name:'Priya Nair',  emp_id:'EMP-0034',empId:'EMP-0034',dept:'Finance',   phone:'9876540003'},
+  {id:4,name:'Ravi Kumar',  emp_id:'EMP-0042',empId:'EMP-0042',dept:'IT',        phone:'9876540004'},
+  {id:5,name:'Kavya Reddy', emp_id:'EMP-0015',empId:'EMP-0015',dept:'Marketing', phone:'9876540005'},
 ];
 var cars=[
   {id:1, reg:'MH14 AB 1234',model:'Hyundai Venue',        color:'Denim Blue',    hex:'#1e4e8c'},
@@ -206,35 +373,100 @@ var cars=[
   {id:12,reg:'DL01 BC 7890',model:'Maruti Suzuki Baleno', color:'Celestial Blue',hex:'#2980b9'},
 ];
 var requests=[
-  {id:1,empId:'EMP-0011',name:'Anita Desai',  dept:'HR',      phone:'',from:'Office, Shirur',to:'Pune Station',  date:'2026-04-28',pickupTime:'09:00',dropTime:'10:00',notes:'Staff pickup',   status:'completed',driver:'Rahul Sharma',car:'MH14 AB 1234',estKm:28,actualKm:30,endTime:'10:15',driverNotes:'',declineReason:'',month:'April'},
-  {id:2,empId:'EMP-0023',name:'Sunil Mehta',  dept:'Sales',   phone:'',from:'Office, Shirur',to:'Infosys Campus',date:'2026-04-29',pickupTime:'10:30',dropTime:'12:30',notes:'Client meeting', status:'completed',driver:'Amit Patil',  car:'MH12 CD 5678',estKm:32,actualKm:35,endTime:'12:40',driverNotes:'',declineReason:'',month:'April'},
-  {id:3,empId:'EMP-0034',name:'Priya Nair',   dept:'Finance', phone:'',from:'Office, Shirur',to:'Airport',        date:'2026-05-01',pickupTime:'06:00',dropTime:'08:00',notes:'Flight at 8am',  status:'assigned', driver:'Rahul Sharma',car:'MH14 AB 1234',estKm:45,actualKm:0, endTime:'',    driverNotes:'',declineReason:'',month:'May'},
-  {id:4,empId:'EMP-0042',name:'Ravi Kumar',   dept:'IT',      phone:'',from:'Office, Shirur',to:'Vendor office', date:'2026-05-01',pickupTime:'14:00',dropTime:'16:00',notes:'Server delivery',status:'pending',  driver:'',car:'',estKm:0,actualKm:0,endTime:'',driverNotes:'',declineReason:'',month:'May'},
-  {id:5,empId:'EMP-0015',name:'Kavya Reddy',  dept:'Marketing',phone:'',from:'Office, Shirur',to:'Hotel Marriott',date:'2026-05-02',pickupTime:'11:00',dropTime:'13:00',notes:'Conference',    status:'pending',  driver:'',car:'',estKm:0,actualKm:0,endTime:'',driverNotes:'',declineReason:'',month:'May'},
+  {id:1,emp_id:'EMP-0011',empId:'EMP-0011',name:'Anita Desai',  dept:'HR',      phone:'',from_loc:'Office, Shirur',from:'Office, Shirur',to_loc:'Pune Station',  to:'Pune Station',  date:'2026-04-28',pickup_time:'09:00',pickupTime:'09:00',drop_time:'10:00',dropTime:'10:00',notes:'Staff pickup',   status:'completed',driver:'Rahul Sharma',car:'MH14 AB 1234',est_km:28,estKm:28,actual_km:30,actualKm:30,end_time:'10:15',endTime:'10:15',driver_notes:'',driverNotes:'',decline_reason:'',declineReason:'',month:'April'},
+  {id:2,emp_id:'EMP-0023',empId:'EMP-0023',name:'Sunil Mehta',  dept:'Sales',   phone:'',from_loc:'Office, Shirur',from:'Office, Shirur',to_loc:'Infosys Campus',to:'Infosys Campus',date:'2026-04-29',pickup_time:'10:30',pickupTime:'10:30',drop_time:'12:30',dropTime:'12:30',notes:'Client meeting', status:'completed',driver:'Amit Patil',  car:'MH12 CD 5678',est_km:32,estKm:32,actual_km:35,actualKm:35,end_time:'12:40',endTime:'12:40',driver_notes:'',driverNotes:'',decline_reason:'',declineReason:'',month:'April'},
+  {id:3,emp_id:'EMP-0034',empId:'EMP-0034',name:'Priya Nair',   dept:'Finance', phone:'',from_loc:'Office, Shirur',from:'Office, Shirur',to_loc:'Airport',        to:'Airport',        date:'2026-05-01',pickup_time:'06:00',pickupTime:'06:00',drop_time:'08:00',dropTime:'08:00',notes:'Flight at 8am',  status:'assigned', driver:'Rahul Sharma',car:'MH14 AB 1234',est_km:45,estKm:45,actual_km:0, actualKm:0, end_time:'',    endTime:'',    driver_notes:'',driverNotes:'',decline_reason:'',declineReason:'',month:'May'},
+  {id:4,emp_id:'EMP-0042',empId:'EMP-0042',name:'Ravi Kumar',   dept:'IT',      phone:'',from_loc:'Office, Shirur',from:'Office, Shirur',to_loc:'Vendor office', to:'Vendor office', date:'2026-05-01',pickup_time:'14:00',pickupTime:'14:00',drop_time:'16:00',dropTime:'16:00',notes:'Server delivery',status:'pending',  driver:'',car:'',est_km:0,estKm:0,actual_km:0,actualKm:0,end_time:'',endTime:'',driver_notes:'',driverNotes:'',decline_reason:'',declineReason:'',month:'May'},
+  {id:5,emp_id:'EMP-0015',empId:'EMP-0015',name:'Kavya Reddy',  dept:'Marketing',phone:'',from_loc:'Office, Shirur',from:'Office, Shirur',to_loc:'Hotel Marriott',to:'Hotel Marriott',date:'2026-05-02',pickup_time:'11:00',pickupTime:'11:00',drop_time:'13:00',dropTime:'13:00',notes:'Conference',    status:'pending',  driver:'',car:'',est_km:0,estKm:0,actual_km:0,actualKm:0,end_time:'',endTime:'',driver_notes:'',driverNotes:'',decline_reason:'',declineReason:'',month:'May'},
 ];
 var nextDriverId=13,nextCarId=13,nextEmpId=6,nextUserId=18;
-var currentUser=null,assignTarget=null,declineTarget=null,completeTarget=null,editCredTarget=null;
 
-// ── TIME-FRAME CONFLICT ───────────────────────────────────────────
+// ── LIVE DATA (loaded from Supabase) ──────────────────────────────
+var liveDrivers=[], liveEmployees=[], liveCars=[], liveRequests=[], liveUsers=[];
+
+// Normalise Supabase row → app field names
+function normReq(r){
+  return{...r,
+    empId:r.emp_id||r.empId,from:r.from_loc||r.from,to:r.to_loc||r.to,
+    pickupTime:r.pickup_time||r.pickupTime,dropTime:r.drop_time||r.dropTime,
+    estKm:r.est_km||r.estKm||0,actualKm:r.actual_km||r.actualKm||0,
+    endTime:r.end_time||r.endTime||'',driverNotes:r.driver_notes||r.driverNotes||'',
+    declineReason:r.decline_reason||r.declineReason||''
+  };
+}
+function normUser(u){
+  return{...u,
+    displayName:u.display_name||u.displayName,
+    empId:u.emp_id||u.empId,driverId:u.driver_id||u.driverId
+  };
+}
+function normEmp(e){return{...e,empId:e.emp_id||e.empId};}
+
+async function refreshData(){
+  if(!useSupabase) return;
+  try{
+    const [u,d,e,c,r]=await Promise.all([dbGetUsers(),dbGetDrivers(),dbGetEmployees(),dbGetCars(),dbGetRequests()]);
+    liveUsers=u.map(normUser); liveDrivers=d; liveEmployees=e.map(normEmp); liveCars=c; liveRequests=r.map(normReq);
+    drivers=liveDrivers; employees=liveEmployees; cars=liveCars; requests=liveRequests; USERS=liveUsers;
+  } catch(e){ console.error('refreshData error',e); }
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  APP GLOBALS
+// ══════════════════════════════════════════════════════════════════
+var currentUser=null, assignTarget=null, declineTarget=null, completeTarget=null, editCredTarget=null;
+
 function toMins(t){if(!t)return 0;var p=t.split(':');return parseInt(p[0])*60+parseInt(p[1]);}
 function tripsOverlap(aS,aE,bS,bE){return toMins(aS)<toMins(bE)&&toMins(aE)>toMins(bS);}
 function isDriverBusyInFrame(name,date,pickup,drop,excl){
-  return requests.some(r=>r.driver===name&&r.date===date&&r.status==='assigned'&&r.id!==excl&&tripsOverlap(pickup,drop,r.pickupTime,r.dropTime));
+  return requests.some(r=>{
+    var id=r.id, status=r.status, driver=r.driver, rdate=r.date;
+    var pt=r.pickupTime||r.pickup_time, dt=r.dropTime||r.drop_time;
+    return driver===name&&rdate===date&&status==='assigned'&&id!==excl&&tripsOverlap(pickup,drop,pt,dt);
+  });
 }
-
-// ── HELPERS ───────────────────────────────────────────────────────
 function badge(s){return`<span class="badge b-${s}">${s.charAt(0).toUpperCase()+s.slice(1)}</span>`;}
-function ini(n){return n.split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();}
+function ini(n){return(n||'??').split(' ').map(x=>x[0]).join('').slice(0,2).toUpperCase();}
 function closeModal(id){document.getElementById(id).classList.remove('open');}
 function openModal(id){document.getElementById(id).classList.add('open');}
 function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className=`toast show toast-${type||'ok'}`;clearTimeout(t._t);t._t=setTimeout(()=>t.className='toast',3200);}
 function togglePass(id,btn){var el=document.getElementById(id);if(!el)return;el.type=el.type==='password'?'text':'password';btn.textContent=el.type==='password'?'👁':'🙈';}
-function v(id){var el=document.getElementById(id);return el?el.value.trim():'';}
-var CAR_SVG=`<svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>`;
+function fv(id){var el=document.getElementById(id);return el?el.value.trim():'';}
+function updateClear(id,val){var c=document.getElementById(id+'-clear');if(c)c.style.display=val?'block':'none';}
 function searchWidget(id,ph,fn){return`<div class="search-wrap"><span class="search-icon">🔍</span><input id="${id}" placeholder="${ph}" oninput="${fn}" style="padding-left:36px"/><button class="search-clear" id="${id}-clear" onclick="var el=document.getElementById('${id}');el.value='';el.dispatchEvent(new Event('input'))">✕</button></div>`;}
-function updateClear(inputId,val){var c=document.getElementById(inputId+'-clear');if(c)c.style.display=val?'block':'none';}
+var CAR_SVG=`<svg viewBox="0 0 24 24"><path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/></svg>`;
 
-function render(){currentUser?renderApp():renderLogin();}
+// ══════════════════════════════════════════════════════════════════
+//  RENDER ENGINE
+// ══════════════════════════════════════════════════════════════════
+function setPage(html){document.getElementById('main-content').innerHTML=`<div class="fade-in">${html}</div>`;}
+
+async function render(){
+  if(!currentUser){ renderLogin(); return; }
+  renderApp();
+}
+
+// ── SETUP GUIDE (shown when Supabase not configured) ──────────────
+function renderSetupGuide(){
+  document.getElementById('root').innerHTML=`
+  <div class="login-wrap">
+    <div class="setup-box">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:1.5rem">
+        <div class="logo-icon" style="width:44px;height:44px">${CAR_SVG}</div>
+        <div><div style="font-family:Outfit,sans-serif;font-size:20px;font-weight:700;color:var(--text-primary)">FleetDesk</div>
+        <div style="font-size:11px;color:var(--text-secondary)">Supabase Setup Required</div></div>
+      </div>
+      <div style="font-size:13px;font-weight:600;color:var(--text-primary);margin-bottom:14px">Connect your database in 3 steps:</div>
+      <div class="setup-step"><div class="step-num">1</div><div>Go to <strong>supabase.com</strong> → Create a free account → New Project</div></div>
+      <div class="setup-step"><div class="step-num">2</div><div>In your project: <strong>SQL Editor</strong> → paste & run the SQL schema from this file's source code comment (search for <code>CREATE TABLE</code>)</div></div>
+      <div class="setup-step"><div class="step-num">3</div><div>Go to <strong>Settings → API</strong> → copy your <code>Project URL</code> and <code>anon public</code> key → paste into the top of this file where it says <code>SUPABASE_URL</code> and <code>SUPABASE_KEY</code></div></div>
+      <div style="margin-top:1.25rem;padding:1rem;background:rgba(61,191,138,0.08);border:1px solid rgba(61,191,138,0.2);border-radius:10px;font-size:12px;color:#27936a">
+        <strong>Not ready yet?</strong> That's fine — click below to continue with demo data. All features work, but data resets on page refresh.
+      </div>
+      <button class="btn btn-primary btn-block" style="margin-top:1rem;padding:11px" onclick="renderLogin()">Continue with demo data →</button>
+    </div>
+  </div>`;
+}
 
 // ── LOGIN ─────────────────────────────────────────────────────────
 function renderLogin(){
@@ -243,50 +475,63 @@ function renderLogin(){
     <div class="login-box">
       <div class="login-logo">${CAR_SVG}</div>
       <div class="login-title">FleetDesk</div>
-      <div class="login-sub">Sign in to manage your fleet</div>
+      <div class="login-sub">${useSupabase?'Connected to Supabase ✓':'Demo mode — data resets on refresh'}</div>
       <div class="fg" style="margin-bottom:14px"><label>Username</label><input id="l-user" placeholder="Enter username" onkeydown="if(event.key==='Enter')doLogin()"/></div>
       <div class="fg"><label>Password</label>
         <div class="pass-field"><input id="l-pass" type="password" placeholder="Enter password" onkeydown="if(event.key==='Enter')doLogin()"/>
         <button class="pass-toggle" onclick="togglePass('l-pass',this)">👁</button></div>
       </div>
-      <button class="btn btn-primary btn-block" style="padding:12px;margin-top:16px" onclick="doLogin()">Sign In →</button>
+      <button class="btn btn-primary btn-block" style="padding:12px;margin-top:16px" id="login-btn" onclick="doLogin()">Sign In →</button>
       <div id="l-err" class="login-err">Invalid username or password.</div>
-      <div class="cred-box"><strong>Default credentials</strong><br>
-        Admin: <code>admin</code> / <code>admin123</code><br>
-        Driver: <code>rahul</code> / <code>driver1</code><br>
-        Employee: <code>anita</code> / <code>emp001</code>
-      </div>
+      ${!useSupabase?`<div style="background:rgba(79,114,227,0.06);border:1px solid rgba(79,114,227,0.15);border-radius:12px;padding:.9rem 1rem;margin-top:1.2rem;font-size:11px;color:var(--text-secondary);line-height:2">
+        <strong>Demo credentials</strong><br>
+        Admin: <code style="background:rgba(79,114,227,0.1);color:var(--accent);padding:1px 6px;border-radius:4px;font-family:monospace">admin</code> / <code style="background:rgba(79,114,227,0.1);color:var(--accent);padding:1px 6px;border-radius:4px;font-family:monospace">admin123</code><br>
+        Driver: <code style="background:rgba(79,114,227,0.1);color:var(--accent);padding:1px 6px;border-radius:4px;font-family:monospace">rahul</code> / <code style="background:rgba(79,114,227,0.1);color:var(--accent);padding:1px 6px;border-radius:4px;font-family:monospace">driver1</code><br>
+        Employee: <code style="background:rgba(79,114,227,0.1);color:var(--accent);padding:1px 6px;border-radius:4px;font-family:monospace">anita</code> / <code style="background:rgba(79,114,227,0.1);color:var(--accent);padding:1px 6px;border-radius:4px;font-family:monospace">emp001</code>
+      </div>`:''}
     </div>
   </div>`;
 }
-function doLogin(){
-  var u=document.getElementById('l-user').value.trim().toLowerCase(),p=document.getElementById('l-pass').value;
-  var user=USERS.find(x=>x.username===u&&x.password===p);
-  if(!user){document.getElementById('l-err').style.display='block';return;}
-  currentUser=user;render();
+
+async function doLogin(){
+  var btn=document.getElementById('login-btn');
+  if(btn){btn.textContent='Signing in…';btn.disabled=true;}
+  var u=document.getElementById('l-user').value.trim().toLowerCase();
+  var p=document.getElementById('l-pass').value;
+  try{
+    var user=await dbAuthUser(u,p);
+    if(!user){document.getElementById('l-err').style.display='block';if(btn){btn.textContent='Sign In →';btn.disabled=false;}return;}
+    currentUser=normUser(user);
+    if(useSupabase) await refreshData();
+    renderApp();
+  } catch(e){
+    toast('Login error: '+e.message,'err');
+    if(btn){btn.textContent='Sign In →';btn.disabled=false;}
+  }
 }
 
 // ── APP SHELL ─────────────────────────────────────────────────────
 function renderApp(){
-  var isAdmin=currentUser.role==='admin',isDriver=currentUser.role==='driver',isEmp=currentUser.role==='employee';
+  var isAdmin=currentUser.role==='admin', isDriver=currentUser.role==='driver', isEmp=currentUser.role==='employee';
   var navs=[];
   navs.push({id:'dashboard',icon:'📊',label:'Dashboard'});
-  if(isEmp)    navs.push({id:'request',     icon:'➕',label:'New Request'});
-  if(isEmp)    navs.push({id:'my-requests', icon:'📋',label:'My Requests'});
-  if(isAdmin)  navs.push({id:'requests',    icon:'📋',label:'All Requests'});
-  if(isDriver) navs.push({id:'driver-trips',icon:'🚗',label:'My Trips'});
-  if(isAdmin)  navs.push({id:'fleet',       icon:'🚗',label:'Manage Fleet'});
-  if(isAdmin)  navs.push({id:'users',       icon:'👥',label:'Manage Users'});
-  if(isAdmin)  navs.push({id:'monthly',     icon:'📅',label:'Monthly Tracking'});
-  if(isAdmin)  navs.push({id:'reports',     icon:'📈',label:'Reports'});
+  if(isEmp)    navs.push({id:'request',      icon:'➕',label:'New Request'});
+  if(isEmp)    navs.push({id:'my-requests',  icon:'📋',label:'My Requests'});
+  if(isAdmin)  navs.push({id:'requests',     icon:'📋',label:'All Requests'});
+  if(isDriver) navs.push({id:'driver-trips', icon:'🚗',label:'My Trips'});
+  if(isAdmin)  navs.push({id:'fleet',        icon:'🚗',label:'Manage Fleet'});
+  if(isAdmin)  navs.push({id:'users',        icon:'👥',label:'Manage Users'});
+  if(isAdmin)  navs.push({id:'monthly',      icon:'📅',label:'Monthly Tracking'});
+  if(isAdmin)  navs.push({id:'reports',      icon:'📈',label:'Reports'});
   var rb=isAdmin?'role-admin':isEmp?'role-employee':'role-driver';
+  var empId=currentUser.empId||currentUser.emp_id||'';
   document.getElementById('root').innerHTML=`
   <div class="app">
     <div class="sidebar">
       <div class="logo-area">
         <div class="logo-icon">${CAR_SVG}</div>
         <div class="logo-name">FleetDesk</div>
-        <div class="logo-sub">Fleet Management System</div>
+        <div class="logo-sub">${useSupabase?'Live — Supabase connected':'Demo mode'}</div>
       </div>
       <div class="nav-section">
         <div class="nav-label">Navigation</div>
@@ -297,14 +542,15 @@ function renderApp(){
           <div class="user-avatar ${isEmp?'avatar-emp':''}">${ini(currentUser.displayName)}</div>
           <div><div class="user-name">${currentUser.displayName}</div>
           <span class="user-role-badge ${rb}">${currentUser.role}</span>
-          ${isEmp&&currentUser.empId?`<div class="emp-id" style="margin-top:3px">${currentUser.empId}</div>`:''}
+          ${empId?`<div class="emp-id" style="margin-top:3px">${empId}</div>`:''}
           </div>
         </div>
         <button class="btn-logout" onclick="logout()">← Sign out</button>
       </div>
     </div>
     <div class="main" id="main-content"></div>
-    <!-- MODALS -->
+
+    <!-- Assign Modal -->
     <div id="assign-modal" class="modal-overlay"><div class="modal">
       <div class="modal-title">Assign Driver & Car</div>
       <div id="assign-info"></div>
@@ -313,28 +559,34 @@ function renderApp(){
       <div class="fg" style="margin-bottom:14px"><label>Car</label><select id="a-car"></select></div>
       <div class="fg"><label>Estimated KM</label><input type="number" id="a-km" placeholder="e.g. 28"/></div>
       <div class="modal-footer">
-        <button class="btn btn-primary btn-sm" onclick="confirmAssign()">Confirm Assignment</button>
+        <button class="btn btn-primary btn-sm" id="assign-confirm-btn" onclick="confirmAssign()">Confirm Assignment</button>
         <button class="btn btn-ghost btn-sm" onclick="closeModal('assign-modal')">Cancel</button>
       </div>
     </div></div>
+
+    <!-- Decline Modal -->
     <div id="decline-modal" class="modal-overlay"><div class="modal">
       <div class="modal-title">Decline Request</div>
       <div class="fg"><label>Reason *</label><textarea id="decline-reason" placeholder="e.g. No driver available for this slot"></textarea></div>
       <div class="modal-footer">
-        <button class="btn btn-danger btn-sm" onclick="confirmDecline()">Decline Request</button>
+        <button class="btn btn-danger btn-sm" id="decline-confirm-btn" onclick="confirmDecline()">Decline Request</button>
         <button class="btn btn-ghost btn-sm" onclick="closeModal('decline-modal')">Cancel</button>
       </div>
     </div></div>
+
+    <!-- Complete Modal -->
     <div id="complete-modal" class="modal-overlay"><div class="modal">
       <div class="modal-title">Mark Trip Completed</div>
       <div class="fg" style="margin-bottom:14px"><label>Actual KM *</label><input type="number" id="c-km" placeholder="e.g. 32"/></div>
       <div class="fg" style="margin-bottom:14px"><label>Trip End Time</label><input type="time" id="c-endtime"/></div>
       <div class="fg"><label>Notes</label><textarea id="c-notes" placeholder="Optional notes"></textarea></div>
       <div class="modal-footer">
-        <button class="btn btn-success btn-sm" onclick="confirmComplete()">Mark Completed ✓</button>
+        <button class="btn btn-success btn-sm" id="complete-confirm-btn" onclick="confirmComplete()">Mark Completed ✓</button>
         <button class="btn btn-ghost btn-sm" onclick="closeModal('complete-modal')">Cancel</button>
       </div>
     </div></div>
+
+    <!-- Add Driver Modal -->
     <div id="add-driver-modal" class="modal-overlay"><div class="modal">
       <div class="modal-title">Add New Driver</div>
       <div class="fg" style="margin-bottom:14px"><label>Full Name *</label><input id="nd-name" placeholder="e.g. Suresh Kumar"/></div>
@@ -352,6 +604,8 @@ function renderApp(){
         <button class="btn btn-ghost btn-sm" onclick="closeModal('add-driver-modal')">Cancel</button>
       </div>
     </div></div>
+
+    <!-- Add Employee Modal -->
     <div id="add-emp-modal" class="modal-overlay"><div class="modal">
       <div class="modal-title">Add New Employee</div>
       <div class="fg" style="margin-bottom:14px"><label>Full Name *</label><input id="ne-name" placeholder="e.g. Raj Sharma"/></div>
@@ -370,6 +624,8 @@ function renderApp(){
         <button class="btn btn-ghost btn-sm" onclick="closeModal('add-emp-modal')">Cancel</button>
       </div>
     </div></div>
+
+    <!-- Add Car Modal -->
     <div id="add-car-modal" class="modal-overlay"><div class="modal">
       <div class="modal-title">Add New Car</div>
       <div class="fg" style="margin-bottom:14px"><label>Reg. No. *</label><input id="nc-reg" placeholder="MH14 XY 1234"/></div>
@@ -381,6 +637,8 @@ function renderApp(){
         <button class="btn btn-ghost btn-sm" onclick="closeModal('add-car-modal')">Cancel</button>
       </div>
     </div></div>
+
+    <!-- Edit Credentials Modal -->
     <div id="edit-cred-modal" class="modal-overlay"><div class="modal">
       <div class="modal-title">Edit Login Credentials</div>
       <div id="edit-cred-info" style="margin-bottom:14px"></div>
@@ -397,22 +655,26 @@ function renderApp(){
   </div>`;
   go('dashboard');
 }
-function logout(){currentUser=null;render();}
-function go(id){
+
+function logout(){currentUser=null;renderLogin();}
+
+async function go(id){
   document.querySelectorAll('.nav').forEach(n=>n.classList.remove('active'));
-  var nav=document.getElementById('nav-'+id);if(nav)nav.classList.add('active');
-  ({dashboard:renderDash,request:renderRequest,requests:renderReqs,'my-requests':renderMyRequests,'driver-trips':renderDriverTrips,fleet:renderFleet,users:renderUsers,monthly:renderMonthly,reports:renderReports})[id]?.();
+  var nav=document.getElementById('nav-'+id); if(nav)nav.classList.add('active');
+  if(useSupabase) await refreshData();
+  var pages={dashboard:renderDash,request:renderRequest,requests:renderReqs,'my-requests':renderMyRequests,'driver-trips':renderDriverTrips,fleet:renderFleet,users:renderUsers,monthly:renderMonthly,reports:renderReports};
+  if(pages[id]) await pages[id]();
 }
-function setPage(html){document.getElementById('main-content').innerHTML=html;}
 
 // ── DASHBOARD ─────────────────────────────────────────────────────
-function renderDash(){
-  var isDriver=currentUser.role==='driver',isEmp=currentUser.role==='employee';
-  var list=isDriver?requests.filter(r=>r.driver===currentUser.displayName):isEmp?requests.filter(r=>r.empId===currentUser.empId):requests;
-  var p=list.filter(r=>r.status==='pending').length,done=list.filter(r=>r.status==='completed').length,km=list.reduce((s,r)=>s+(r.actualKm||0),0);
+async function renderDash(){
+  var isDriver=currentUser.role==='driver', isEmp=currentUser.role==='employee';
+  var myEmpId=currentUser.empId||currentUser.emp_id||'';
+  var list=isDriver?requests.filter(r=>r.driver===currentUser.displayName):isEmp?requests.filter(r=>(r.empId||r.emp_id)===myEmpId):requests;
+  var p=list.filter(r=>r.status==='pending').length, done=list.filter(r=>r.status==='completed').length, km=list.reduce((s,r)=>s+(r.actualKm||r.actual_km||0),0);
   setPage(`
     <div class="ptitle">Dashboard</div>
-    <div class="psubtitle">Welcome back, ${currentUser.displayName}</div>
+    <div class="psubtitle">Welcome back, ${currentUser.displayName}${useSupabase?' &nbsp;·&nbsp; <span style="color:var(--success);font-size:11px">● Live</span>':' &nbsp;·&nbsp; <span style="color:var(--text-muted);font-size:11px">Demo mode</span>'}</div>
     <div class="stats">
       <div class="scard"><div class="scard-accent" style="background:var(--accent-grad)"></div><div class="scard-label">${isEmp?'My Requests':'Total Requests'}</div><div class="scard-val">${list.length}</div><div class="scard-sub">All time</div></div>
       <div class="scard"><div class="scard-accent" style="background:linear-gradient(90deg,#f59e42,#fbbf6e)"></div><div class="scard-label">Pending</div><div class="scard-val">${p}</div><div class="scard-sub">Awaiting action</div></div>
@@ -423,27 +685,25 @@ function renderDash(){
       <div class="ctitle">Recent Requests</div>
       ${!list.length?`<div class="empty-state"><div class="icon">📋</div><div class="msg">No requests yet</div></div>`:`
       <table class="tbl"><thead><tr><th>Emp ID</th><th>Employee</th><th>Route</th><th>Time Frame</th><th>Status</th></tr></thead>
-      <tbody>${list.slice().reverse().slice(0,6).map(r=>`<tr>
-        <td class="emp-id">${r.empId}</td>
-        <td><div style="font-weight:600;font-size:13px">${r.name}</div><div style="font-size:11px;color:var(--text-muted)">${r.dept}</div></td>
-        <td style="font-size:12px;color:var(--text-secondary)">${r.from} → ${r.to}</td>
-        <td><span class="time-range-badge">🕐 ${r.pickupTime} – ${r.dropTime}</span><div style="font-size:10px;color:var(--text-muted);margin-top:2px">${r.date}</div></td>
-        <td>${badge(r.status)}</td></tr>`).join('')}
-      </tbody></table>`}
+      <tbody>${list.slice(0,6).map(r=>{
+        var ei=r.empId||r.emp_id, pt=r.pickupTime||r.pickup_time, dt=r.dropTime||r.drop_time;
+        var fr=r.from||r.from_loc, to=r.to||r.to_loc;
+        return`<tr><td class="emp-id">${ei}</td><td><div style="font-weight:600;font-size:13px">${r.name}</div><div style="font-size:11px;color:var(--text-muted)">${r.dept||''}</div></td><td style="font-size:12px;color:var(--text-secondary)">${fr} → ${to}</td><td><span class="time-range-badge">🕐 ${pt} – ${dt}</span><div style="font-size:10px;color:var(--text-muted);margin-top:2px">${r.date}</div></td><td>${badge(r.status)}</td></tr>`;
+      }).join('')}</tbody></table>`}
     </div>`);
 }
 
 // ── NEW REQUEST ───────────────────────────────────────────────────
-function renderRequest(){
-  var empId=currentUser.empId||'',empName=currentUser.displayName||'';
+async function renderRequest(){
+  var myEmpId=currentUser.empId||currentUser.emp_id||'', myName=currentUser.displayName||'';
   setPage(`
     <div class="ptitle">New Travel Request</div>
     <div class="psubtitle">Submit a car request for your trip</div>
     <div class="glass-card">
       <div class="ctitle">Your Details</div>
       <div class="frow">
-        <div class="fg"><label>Employee ID</label><input id="f-empid" value="${empId}" ${empId?'readonly style="background:rgba(79,114,227,0.05);color:var(--accent)"':''} placeholder="EMP-XXXX"/></div>
-        <div class="fg"><label>Full Name</label><input id="f-name" value="${empName}" ${empName?'readonly style="background:rgba(79,114,227,0.05);color:var(--accent)"':''} placeholder="Your name"/></div>
+        <div class="fg"><label>Employee ID</label><input id="f-empid" value="${myEmpId}" ${myEmpId?'readonly style="background:rgba(79,114,227,0.05);color:var(--accent)"':''} placeholder="EMP-XXXX"/></div>
+        <div class="fg"><label>Full Name</label><input id="f-name" value="${myName}" ${myName?'readonly style="background:rgba(79,114,227,0.05);color:var(--accent)"':''} placeholder="Your name"/></div>
       </div>
       <div class="frow">
         <div class="fg"><label>Department</label><input id="f-dept" placeholder="e.g. Sales"/></div>
@@ -466,48 +726,60 @@ function renderRequest(){
       </div>
       <div id="time-warn" style="font-size:11px;color:var(--danger);background:rgba(224,92,106,0.07);padding:7px 10px;border-radius:8px;border:1px solid rgba(224,92,106,0.2);margin-bottom:10px;display:none">⚠ Drop time must be after pickup time.</div>
       <div class="fg" style="margin-bottom:18px"><label>Purpose / Notes</label><textarea id="f-notes" placeholder="e.g. Client meeting at Infosys campus"></textarea></div>
-      <button class="btn btn-primary" style="padding:11px 28px" onclick="submitReq()">Submit Request →</button>
+      <button class="btn btn-primary" style="padding:11px 28px" id="submit-req-btn" onclick="submitReq()">Submit Request →</button>
     </div>`);
 }
+
 function validateTimes(){
-  var p=document.getElementById('f-pickup').value,d=document.getElementById('f-drop').value;
+  var p=document.getElementById('f-pickup').value, d=document.getElementById('f-drop').value;
   var w=document.getElementById('time-warn');
   if(p&&d) w.style.display=toMins(d)<=toMins(p)?'block':'none';
 }
-function submitReq(){
-  var empId=v('f-empid'),name=v('f-name'),from=v('f-from'),to=v('f-to'),date=v('f-date'),pickup=v('f-pickup'),drop=v('f-drop');
+
+async function submitReq(){
+  var empId=fv('f-empid'), name=fv('f-name'), from=fv('f-from'), to=fv('f-to'), date=fv('f-date'), pickup=fv('f-pickup'), drop=fv('f-drop');
   if(!empId||!name||!from||!to||!date||!pickup||!drop){toast('Fill all required (*) fields','err');return;}
   if(toMins(drop)<=toMins(pickup)){toast('Drop time must be after pickup time','err');return;}
+  var btn=document.getElementById('submit-req-btn');
+  if(btn){btn.textContent='Submitting…';btn.disabled=true;}
   var month=new Date(date).toLocaleString('default',{month:'long'});
-  requests.push({id:requests.length+1,empId,name,dept:v('f-dept'),phone:v('f-phone'),from,to,date,pickupTime:pickup,dropTime:drop,notes:v('f-notes'),status:'pending',driver:'',car:'',estKm:0,actualKm:0,endTime:'',driverNotes:'',declineReason:'',month});
-  ['f-dept','f-phone','f-from','f-to','f-date','f-pickup','f-drop','f-notes'].forEach(id=>{var el=document.getElementById(id);if(el)el.value='';});
-  toast('Request submitted!','ok');
+  var rec={emp_id:empId,empId,name,dept:fv('f-dept'),phone:fv('f-phone'),from_loc:from,from,to_loc:to,to,date,pickup_time:pickup,pickupTime:pickup,drop_time:drop,dropTime:drop,notes:fv('f-notes'),status:'pending',driver:'',car:'',est_km:0,estKm:0,actual_km:0,actualKm:0,end_time:'',endTime:'',driver_notes:'',driverNotes:'',decline_reason:'',declineReason:'',month};
+  try{
+    await dbInsertRequest(rec);
+    ['f-dept','f-phone','f-from','f-to','f-date','f-pickup','f-drop','f-notes'].forEach(id=>{var el=document.getElementById(id);if(el)el.value='';});
+    toast('Request submitted!','ok');
+    if(btn){btn.textContent='Submit Request →';btn.disabled=false;}
+  } catch(e){ toast('Error: '+e.message,'err'); if(btn){btn.textContent='Submit Request →';btn.disabled=false;} }
 }
 
 // ── MY REQUESTS ───────────────────────────────────────────────────
-function renderMyRequests(){
-  var mine=requests.filter(r=>r.empId===currentUser.empId);
+async function renderMyRequests(){
+  var myEmpId=currentUser.empId||currentUser.emp_id||'';
+  var mine=requests.filter(r=>(r.empId||r.emp_id)===myEmpId);
   setPage(`
     <div class="ptitle">My Requests</div>
-    <div class="psubtitle">Your personal travel history — ${currentUser.empId}</div>
+    <div class="psubtitle">Your personal travel history — ${myEmpId}</div>
     ${!mine.length?`<div class="glass-card"><div class="empty-state"><div class="icon">🚗</div><div class="msg">No requests yet</div><div class="sub">Use "New Request" to raise a travel request</div></div></div>`:`
     <div class="glass-card" style="padding:0;overflow:hidden">
       <table class="tbl">
         <thead><tr><th style="padding:14px 16px">Route</th><th>Date</th><th>Time Frame</th><th>Driver</th><th>Status</th><th>KM</th></tr></thead>
-        <tbody>${mine.slice().reverse().map(r=>`<tr>
-          <td style="padding:12px 16px"><div style="font-weight:600;font-size:13px">${r.from} → ${r.to}</div><div style="font-size:11px;color:var(--text-muted)">${r.notes||'—'}</div></td>
-          <td style="font-size:11px;color:var(--text-muted)">${r.date}</td>
-          <td><span class="time-range-badge">🕐 ${r.pickupTime} – ${r.dropTime}</span></td>
-          <td style="font-size:12px;color:var(--text-secondary)">${r.driver||'<span style="color:var(--text-muted)">Pending</span>'}</td>
-          <td>${badge(r.status)}${r.status==='declined'&&r.declineReason?`<div style="font-size:10px;color:var(--danger);margin-top:3px">${r.declineReason}</div>`:''}</td>
-          <td style="font-size:12px;font-weight:600">${r.actualKm||r.estKm||'—'}</td></tr>`).join('')}
+        <tbody>${mine.map(r=>{
+          var pt=r.pickupTime||r.pickup_time, dt=r.dropTime||r.drop_time, fr=r.from||r.from_loc, to=r.to||r.to_loc, akm=r.actualKm||r.actual_km||0, ekm=r.estKm||r.est_km||0, dr=r.declineReason||r.decline_reason||'';
+          return`<tr>
+            <td style="padding:12px 16px"><div style="font-weight:600;font-size:13px">${fr} → ${to}</div><div style="font-size:11px;color:var(--text-muted)">${r.notes||'—'}</div></td>
+            <td style="font-size:11px;color:var(--text-muted)">${r.date}</td>
+            <td><span class="time-range-badge">🕐 ${pt} – ${dt}</span></td>
+            <td style="font-size:12px;color:var(--text-secondary)">${r.driver||'<span style="color:var(--text-muted)">Pending</span>'}</td>
+            <td>${badge(r.status)}${r.status==='declined'&&dr?`<div style="font-size:10px;color:var(--danger);margin-top:3px">${dr}</div>`:''}</td>
+            <td style="font-size:12px;font-weight:600">${akm||ekm||'—'}</td></tr>`;
+        }).join('')}
         </tbody>
       </table>
     </div>`});
 }
 
 // ── ALL REQUESTS ──────────────────────────────────────────────────
-function renderReqs(){
+async function renderReqs(){
   setPage(`
     <div class="ptitle">All Requests</div>
     <div class="psubtitle">Manage and assign all employee travel requests</div>
@@ -515,92 +787,104 @@ function renderReqs(){
       <table class="tbl">
         <thead><tr><th style="padding:14px 16px">Emp ID</th><th>Employee</th><th>Route</th><th>Date & Time Frame</th><th>Status</th><th>Actions</th></tr></thead>
         <tbody>${requests.map(r=>{
+          var ei=r.empId||r.emp_id, pt=r.pickupTime||r.pickup_time, dt=r.dropTime||r.drop_time, fr=r.from||r.from_loc, to=r.to||r.to_loc, dr=r.declineReason||r.decline_reason||'';
           var act='';
           if(r.status==='pending') act=`<div style="display:flex;gap:6px"><button class="btn btn-primary btn-sm" onclick="openAssign(${r.id})">Assign</button><button class="btn btn-danger btn-sm" onclick="openDecline(${r.id})">Decline</button></div>`;
           else if(r.status==='assigned') act=`<button class="btn btn-danger btn-sm" onclick="openDecline(${r.id})">Decline</button>`;
-          else if(r.status==='declined') act=`<span style="font-size:10px;color:var(--danger)">${r.declineReason}</span>`;
+          else if(r.status==='declined') act=`<span style="font-size:10px;color:var(--danger)">${dr}</span>`;
           else act=`<span style="font-size:11px;color:var(--text-secondary)">${r.driver}</span>`;
           return`<tr>
-            <td class="emp-id" style="padding:12px 16px">${r.empId}</td>
-            <td><div style="font-weight:600;font-size:13px">${r.name}</div><div style="font-size:11px;color:var(--text-muted)">${r.dept}</div></td>
-            <td style="font-size:12px;color:var(--text-secondary)">${r.from} → ${r.to}</td>
-            <td><span class="time-range-badge">🕐 ${r.pickupTime} – ${r.dropTime}</span><div style="font-size:10px;color:var(--text-muted);margin-top:2px">${r.date}</div></td>
+            <td class="emp-id" style="padding:12px 16px">${ei}</td>
+            <td><div style="font-weight:600;font-size:13px">${r.name}</div><div style="font-size:11px;color:var(--text-muted)">${r.dept||''}</div></td>
+            <td style="font-size:12px;color:var(--text-secondary)">${fr} → ${to}</td>
+            <td><span class="time-range-badge">🕐 ${pt} – ${dt}</span><div style="font-size:10px;color:var(--text-muted);margin-top:2px">${r.date}</div></td>
             <td>${badge(r.status)}</td><td>${act}</td></tr>`;
         }).join('')}</tbody>
       </table>
     </div>`);
 }
+
 function openAssign(id){
-  assignTarget=id;var req=requests.find(r=>r.id===id);
-  document.getElementById('assign-info').innerHTML=`<div class="info-box">📍 ${req.from} → ${req.to}<br>📅 ${req.date} &nbsp;·&nbsp; 🕐 ${req.pickupTime} – ${req.dropTime}</div>`;
-  document.getElementById('a-driver').innerHTML=drivers.map(d=>{
-    var busy=isDriverBusyInFrame(d.name,req.date,req.pickupTime,req.dropTime,id);
-    return`<option value="${d.name}" class="${busy?'unavailable':'available'}">${busy?'⚠':'✓'} ${d.name}${busy?' — Busy '+req.pickupTime+'-'+req.dropTime:' — Available'}</option>`;
-  }).join('');
+  assignTarget=id; var req=requests.find(r=>r.id===id); if(!req)return;
+  var pt=req.pickupTime||req.pickup_time, dt=req.dropTime||req.drop_time, fr=req.from||req.from_loc, to=req.to||req.to_loc;
+  document.getElementById('assign-info').innerHTML=`<div class="info-box">📍 ${fr} → ${to}<br>📅 ${req.date} &nbsp;·&nbsp; 🕐 ${pt} – ${dt}</div>`;
+  document.getElementById('a-driver').innerHTML=drivers.map(d=>{var busy=isDriverBusyInFrame(d.name,req.date,pt,dt,id);return`<option value="${d.name}" class="${busy?'unavailable':'available'}">${busy?'⚠':'✓'} ${d.name}${busy?' — Busy '+pt+'-'+dt:' — Available'}</option>`;}).join('');
   document.getElementById('a-car').innerHTML=cars.map(c=>`<option value="${c.reg}">${c.reg} — ${c.model}</option>`).join('');
-  document.getElementById('a-km').value='';checkConflict();openModal('assign-modal');
+  document.getElementById('a-km').value=''; checkConflict(); openModal('assign-modal');
 }
 function checkConflict(){
-  var req=requests.find(r=>r.id===assignTarget);if(!req)return;
-  document.getElementById('conflict-warn').style.display=isDriverBusyInFrame(document.getElementById('a-driver').value,req.date,req.pickupTime,req.dropTime,assignTarget)?'block':'none';
+  var req=requests.find(r=>r.id===assignTarget); if(!req)return;
+  var pt=req.pickupTime||req.pickup_time, dt=req.dropTime||req.drop_time;
+  document.getElementById('conflict-warn').style.display=isDriverBusyInFrame(document.getElementById('a-driver').value,req.date,pt,dt,assignTarget)?'block':'none';
 }
-function confirmAssign(){
-  var req=requests.find(r=>r.id===assignTarget);if(!req)return;
-  var d=document.getElementById('a-driver').value;
-  if(isDriverBusyInFrame(d,req.date,req.pickupTime,req.dropTime,assignTarget)){toast('Driver is busy during this time frame!','err');return;}
-  req.status='assigned';req.driver=d;req.car=document.getElementById('a-car').value;
-  req.estKm=parseInt(document.getElementById('a-km').value)||0;
-  req.month=new Date(req.date).toLocaleString('default',{month:'long'});
-  closeModal('assign-modal');renderReqs();toast(`${d} assigned to ${req.empId}`,'ok');
+async function confirmAssign(){
+  var req=requests.find(r=>r.id===assignTarget); if(!req)return;
+  var d=document.getElementById('a-driver').value, pt=req.pickupTime||req.pickup_time, dt=req.dropTime||req.drop_time;
+  if(isDriverBusyInFrame(d,req.date,pt,dt,assignTarget)){toast('Driver is busy during this time frame!','err');return;}
+  var btn=document.getElementById('assign-confirm-btn'); if(btn){btn.textContent='Saving…';btn.disabled=true;}
+  var month=new Date(req.date).toLocaleString('default',{month:'long'});
+  var updates={status:'assigned',driver:d,car:document.getElementById('a-car').value,est_km:parseInt(document.getElementById('a-km').value)||0,month};
+  try{
+    await dbUpdateRequest(req.id,updates);
+    closeModal('assign-modal'); await renderReqs(); toast(`${d} assigned to ${req.empId||req.emp_id}`,'ok');
+  } catch(e){ toast('Error: '+e.message,'err'); } finally{ if(btn){btn.textContent='Confirm Assignment';btn.disabled=false;} }
 }
 function openDecline(id){declineTarget=id;document.getElementById('decline-reason').value='';openModal('decline-modal');}
-function confirmDecline(){
-  var r=document.getElementById('decline-reason').value.trim();
-  if(!r){toast('Please enter a reason','err');return;}
-  var req=requests.find(x=>x.id===declineTarget);
-  if(req){req.status='declined';req.declineReason=r;req.driver='';req.car='';}
-  closeModal('decline-modal');renderReqs();toast('Request declined','warn');
+async function confirmDecline(){
+  var reason=document.getElementById('decline-reason').value.trim();
+  if(!reason){toast('Please enter a reason','err');return;}
+  var btn=document.getElementById('decline-confirm-btn'); if(btn){btn.textContent='Saving…';btn.disabled=true;}
+  try{
+    await dbUpdateRequest(declineTarget,{status:'declined',decline_reason:reason,driver:'',car:''});
+    closeModal('decline-modal'); await renderReqs(); toast('Request declined','warn');
+  } catch(e){ toast('Error: '+e.message,'err'); } finally{ if(btn){btn.textContent='Decline Request';btn.disabled=false;} }
 }
 
 // ── DRIVER TRIPS ──────────────────────────────────────────────────
-function renderDriverTrips(){
+async function renderDriverTrips(){
   var name=currentUser.displayName;
   var trips=requests.filter(r=>r.driver===name&&(r.status==='assigned'||r.status==='completed'));
   setPage(`
     <div class="ptitle">My Trips</div>
     <div class="psubtitle">Trips assigned to you — ${name}</div>
     ${!trips.length?`<div class="glass-card"><div class="empty-state"><div class="icon">🚗</div><div class="msg">No trips assigned yet</div></div></div>`:
-    trips.map(r=>`<div class="glass-card">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem">
-        <div><div style="font-size:15px;font-weight:700;margin-bottom:4px">${r.from} → ${r.to}</div>
-        <div class="emp-id">${r.empId} · ${r.name} · ${r.dept}</div>
-        <div style="margin-top:5px;display:flex;gap:8px;align-items:center">
-          <span class="time-range-badge">🕐 ${r.pickupTime} – ${r.dropTime}</span>
-          <span style="font-size:11px;color:var(--text-muted)">${r.date} · Car: <strong>${r.car}</strong></span>
-        </div></div>${badge(r.status)}
-      </div>
-      ${r.status==='assigned'?`<button class="btn btn-success" onclick="openComplete(${r.id})">✓ Mark Trip Completed</button>`:
-      `<div style="font-size:12px;color:var(--text-secondary);background:rgba(61,191,138,0.07);border:1px solid rgba(61,191,138,0.2);padding:8px 12px;border-radius:8px">Actual KM: <strong>${r.actualKm}</strong>${r.endTime?' · End: '+r.endTime:''}${r.driverNotes?' · '+r.driverNotes:''}</div>`}
-    </div>`).join('')}`);
+    trips.map(r=>{
+      var pt=r.pickupTime||r.pickup_time, dt=r.dropTime||r.drop_time, fr=r.from||r.from_loc, to=r.to||r.to_loc, dn=r.driverNotes||r.driver_notes||'', et=r.endTime||r.end_time||'', akm=r.actualKm||r.actual_km||0;
+      return`<div class="glass-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:1rem">
+          <div><div style="font-size:15px;font-weight:700;margin-bottom:4px">${fr} → ${to}</div>
+          <div class="emp-id">${r.empId||r.emp_id} · ${r.name} · ${r.dept||''}</div>
+          <div style="margin-top:5px;display:flex;gap:8px;align-items:center">
+            <span class="time-range-badge">🕐 ${pt} – ${dt}</span>
+            <span style="font-size:11px;color:var(--text-muted)">${r.date} · Car: <strong>${r.car}</strong></span>
+          </div></div>${badge(r.status)}
+        </div>
+        ${r.status==='assigned'?`<button class="btn btn-success" onclick="openComplete(${r.id})">✓ Mark Trip Completed</button>`:
+        `<div style="font-size:12px;color:var(--text-secondary);background:rgba(61,191,138,0.07);border:1px solid rgba(61,191,138,0.2);padding:8px 12px;border-radius:8px">Actual KM: <strong>${akm}</strong>${et?' · End: '+et:''}${dn?' · '+dn:''}</div>`}
+      </div>`;
+    }).join('')}`);
 }
 function openComplete(id){
   var r=requests.find(x=>x.id===id);
   if(!r||r.driver!==currentUser.displayName){toast('Not authorised','err');return;}
   completeTarget=id;
-  document.getElementById('c-km').value='';document.getElementById('c-endtime').value='';document.getElementById('c-notes').value='';
+  document.getElementById('c-km').value=''; document.getElementById('c-endtime').value=''; document.getElementById('c-notes').value='';
   openModal('complete-modal');
 }
-function confirmComplete(){
+async function confirmComplete(){
   var km=parseInt(document.getElementById('c-km').value);
   if(!km||km<=0){toast('Enter actual KM','err');return;}
   var r=requests.find(x=>x.id===completeTarget);
   if(!r||r.driver!==currentUser.displayName){toast('Not authorised','err');return;}
-  r.status='completed';r.actualKm=km;r.endTime=document.getElementById('c-endtime').value;r.driverNotes=document.getElementById('c-notes').value;
-  closeModal('complete-modal');renderDriverTrips();toast('Trip completed! KM: '+km,'ok');
+  var btn=document.getElementById('complete-confirm-btn'); if(btn){btn.textContent='Saving…';btn.disabled=true;}
+  try{
+    await dbUpdateRequest(completeTarget,{status:'completed',actual_km:km,end_time:document.getElementById('c-endtime').value,driver_notes:document.getElementById('c-notes').value});
+    closeModal('complete-modal'); await renderDriverTrips(); toast('Trip completed! KM: '+km,'ok');
+  } catch(e){ toast('Error: '+e.message,'err'); } finally{ if(btn){btn.textContent='Mark Completed ✓';btn.disabled=false;} }
 }
 
 // ── MANAGE FLEET ──────────────────────────────────────────────────
-function renderFleet(){
+async function renderFleet(){
   setPage(`
     <div class="ptitle">Manage Fleet</div>
     <div class="psubtitle">Add or remove drivers and vehicles — admin only</div>
@@ -622,66 +906,55 @@ function renderFleet(){
         <div class="glass-card" style="padding:.5rem 1rem" id="fleet-car-list"></div>
       </div>
     </div>`);
-  renderFleetDrivers(drivers);renderFleetCars(cars);
+  renderFleetDrivers(drivers); renderFleetCars(cars);
 }
 function driverRow(d){
-  var t=requests.filter(r=>r.driver===d.name&&r.status==='completed'),km=t.reduce((s,r)=>s+(r.actualKm||0),0);
-  return`<div class="drow">
-    <div style="display:flex;align-items:center;gap:11px">
-      <div class="avatar">${ini(d.name)}</div>
-      <div><div style="font-size:13px;font-weight:600">${d.name}</div>
-      <div style="font-size:11px;color:var(--text-secondary)">${d.phone}</div>
-      <div style="font-size:10px;color:var(--text-muted)">${d.license}</div></div>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <div style="text-align:right"><div style="font-size:12px;font-weight:600">${t.length} trips · ${km}km</div></div>
-      <button class="btn btn-danger btn-sm btn-icon" onclick="removeDriver(${d.id})">×</button>
-    </div>
-  </div>`;
+  var t=requests.filter(r=>r.driver===d.name&&r.status==='completed'), km=t.reduce((s,r)=>s+(r.actualKm||r.actual_km||0),0);
+  return`<div class="drow"><div style="display:flex;align-items:center;gap:11px"><div class="avatar">${ini(d.name)}</div><div><div style="font-size:13px;font-weight:600">${d.name}</div><div style="font-size:11px;color:var(--text-secondary)">${d.phone}</div><div style="font-size:10px;color:var(--text-muted)">${d.license}</div></div></div><div style="display:flex;align-items:center;gap:8px"><div style="text-align:right"><div style="font-size:12px;font-weight:600">${t.length} trips · ${km}km</div></div><button class="btn btn-danger btn-sm btn-icon" onclick="removeDriver(${d.id})">×</button></div></div>`;
 }
 function carRow(c){
-  var t=requests.filter(r=>r.car===c.reg&&r.status==='completed'),km=t.reduce((s,r)=>s+(r.actualKm||0),0);
-  return`<div class="drow">
-    <div style="display:flex;align-items:center;gap:11px">
-      <span class="color-dot" style="width:14px;height:14px;background:${c.hex}"></span>
-      <div><div style="font-size:13px;font-weight:600">${c.model}</div>
-      <div style="font-size:11px;color:var(--text-secondary)">${c.reg}</div>
-      <div style="font-size:10px;color:var(--text-muted)">${c.color}</div></div>
-    </div>
-    <div style="display:flex;align-items:center;gap:8px">
-      <div style="text-align:right"><div style="font-size:12px;font-weight:600">${t.length} trips · ${km}km</div></div>
-      <button class="btn btn-danger btn-sm btn-icon" onclick="removeCar(${c.id})">×</button>
-    </div>
-  </div>`;
+  var t=requests.filter(r=>r.car===c.reg&&r.status==='completed'), km=t.reduce((s,r)=>s+(r.actualKm||r.actual_km||0),0);
+  return`<div class="drow"><div style="display:flex;align-items:center;gap:11px"><span class="color-dot" style="width:14px;height:14px;background:${c.hex}"></span><div><div style="font-size:13px;font-weight:600">${c.model}</div><div style="font-size:11px;color:var(--text-secondary)">${c.reg}</div><div style="font-size:10px;color:var(--text-muted)">${c.color}</div></div></div><div style="display:flex;align-items:center;gap:8px"><div style="text-align:right"><div style="font-size:12px;font-weight:600">${t.length} trips · ${km}km</div></div><button class="btn btn-danger btn-sm btn-icon" onclick="removeCar(${c.id})">×</button></div></div>`;
 }
 function renderFleetDrivers(list){var el=document.getElementById('fleet-drv-list');if(!el)return;var c=document.getElementById('drv-count');if(c)c.textContent=list.length;el.innerHTML=list.length?list.map(driverRow).join(''):'<div class="no-results">No drivers found</div>';}
 function renderFleetCars(list){var el=document.getElementById('fleet-car-list');if(!el)return;var c=document.getElementById('car-count');if(c)c.textContent=list.length;el.innerHTML=list.length?list.map(carRow).join(''):'<div class="no-results">No cars found</div>';}
 function filterFleetDrivers(q){updateClear('fleet-drv-search',q);var f=q.toLowerCase();renderFleetDrivers(drivers.filter(d=>d.name.toLowerCase().includes(f)||d.phone.includes(f)||d.license.toLowerCase().includes(f)));}
 function filterFleetCars(q){updateClear('fleet-car-search',q);var f=q.toLowerCase();renderFleetCars(cars.filter(c=>c.model.toLowerCase().includes(f)||c.reg.toLowerCase().includes(f)||c.color.toLowerCase().includes(f)));}
-function removeDriver(id){if(!confirm('Remove this driver?'))return;drivers=drivers.filter(d=>d.id!==id);USERS=USERS.filter(u=>u.driverId!==id);renderFleet();toast('Driver removed','warn');}
-function removeCar(id){if(!confirm('Remove this car?'))return;cars=cars.filter(c=>c.id!==id);renderFleet();toast('Car removed','warn');}
-function addDriver(){
-  var name=v('nd-name'),phone=v('nd-phone'),license=v('nd-license'),uname=v('nd-username').toLowerCase(),pass=document.getElementById('nd-password').value;
+async function removeDriver(id){
+  if(!confirm('Remove this driver?'))return;
+  try{ await dbDeleteDriver(id); await renderFleet(); toast('Driver removed','warn'); } catch(e){ toast('Error: '+e.message,'err'); }
+}
+async function removeCar(id){
+  if(!confirm('Remove this car?'))return;
+  try{ await dbDeleteCar(id); await renderFleet(); toast('Car removed','warn'); } catch(e){ toast('Error: '+e.message,'err'); }
+}
+async function addDriver(){
+  var name=fv('nd-name'),phone=fv('nd-phone'),license=fv('nd-license'),uname=fv('nd-username').toLowerCase(),pass=document.getElementById('nd-password').value;
   if(!name||!phone||!license||!uname||!pass){toast('All fields required','err');return;}
   if(USERS.find(u=>u.username===uname)){toast('Username already taken','err');return;}
-  var did=nextDriverId++;
-  drivers.push({id:did,name,phone,license});
-  USERS.push({id:'u'+nextUserId++,username:uname,password:pass,role:'driver',displayName:name,empId:null,driverId:did});
-  closeModal('add-driver-modal');
-  ['nd-name','nd-phone','nd-license','nd-username','nd-password'].forEach(id=>{var el=document.getElementById(id);if(el)el.value='';});
-  renderFleet();toast(name+' added','ok');
+  try{
+    var d=await dbInsertDriver({name,phone,license});
+    await dbInsertUser({username:uname,password:pass,role:'driver',display_name:name,displayName:name,emp_id:null,empId:null,driver_id:d.id,driverId:d.id});
+    closeModal('add-driver-modal');
+    ['nd-name','nd-phone','nd-license','nd-username','nd-password'].forEach(id=>{var el=document.getElementById(id);if(el)el.value='';});
+    if(useSupabase) await refreshData();
+    await renderFleet(); toast(name+' added','ok');
+  } catch(e){ toast('Error: '+e.message,'err'); }
 }
-function addCar(){
-  var reg=v('nc-reg'),model=v('nc-model'),color=v('nc-color'),hex=document.getElementById('nc-hex').value;
+async function addCar(){
+  var reg=fv('nc-reg'),model=fv('nc-model'),color=fv('nc-color'),hex=document.getElementById('nc-hex').value;
   if(!reg||!model||!color){toast('All fields required','err');return;}
-  cars.push({id:nextCarId++,reg,model,color,hex});
-  closeModal('add-car-modal');
-  ['nc-reg','nc-model','nc-color'].forEach(id=>{var el=document.getElementById(id);if(el)el.value='';});
-  renderFleet();toast(model+' added','ok');
+  try{
+    await dbInsertCar({reg,model,color,hex});
+    closeModal('add-car-modal');
+    ['nc-reg','nc-model','nc-color'].forEach(id=>{var el=document.getElementById(id);if(el)el.value='';});
+    if(useSupabase) await refreshData();
+    await renderFleet(); toast(model+' added','ok');
+  } catch(e){ toast('Error: '+e.message,'err'); }
 }
 
 // ── MANAGE USERS ──────────────────────────────────────────────────
-function renderUsers(){
+async function renderUsers(){
   setPage(`
     <div class="ptitle">Manage Users</div>
     <div class="psubtitle">Admin-only — manage employees and all login credentials</div>
@@ -702,91 +975,87 @@ function renderUsers(){
         <div class="glass-card" style="padding:.5rem 1rem" id="usr-drv-list"></div>
       </div>
     </div>`);
-  renderUserEmpList(employees);renderUserDrvList(drivers);
+  renderUserEmpList(employees); renderUserDrvList(drivers);
 }
 function empUserRow(e){
-  var u=USERS.find(x=>x.empId===e.empId);
-  return`<div class="drow">
-    <div style="display:flex;align-items:center;gap:11px">
-      <div class="avatar avatar-emp">${ini(e.name)}</div>
-      <div><div style="font-size:13px;font-weight:600">${e.name}</div>
-      <div class="emp-id">${e.empId} · ${e.dept}</div>
-      ${u?`<div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap"><span class="cred-tag">👤 ${u.username}</span><span class="cred-tag">🔑 ${'•'.repeat(Math.min(u.password.length,8))}</span></div>`:'<div style="font-size:10px;color:var(--danger);margin-top:3px">⚠ No login yet</div>'}
-      </div>
-    </div>
-    <div style="display:flex;gap:5px;align-items:center">
-      <button class="btn btn-warn btn-sm" onclick="openEditCred('emp','${e.empId}')">Edit Login</button>
-      <button class="btn btn-danger btn-sm btn-icon" onclick="removeEmployee(${e.id})">×</button>
-    </div>
-  </div>`;
+  var eid=e.empId||e.emp_id, u=USERS.find(x=>(x.empId||x.emp_id)===eid);
+  return`<div class="drow"><div style="display:flex;align-items:center;gap:11px"><div class="avatar avatar-emp">${ini(e.name)}</div><div><div style="font-size:13px;font-weight:600">${e.name}</div><div class="emp-id">${eid} · ${e.dept||''}</div>${u?`<div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap"><span class="cred-tag">👤 ${u.username}</span><span class="cred-tag">🔑 ${'•'.repeat(Math.min((u.password||'').length,8))}</span></div>`:'<div style="font-size:10px;color:var(--danger);margin-top:3px">⚠ No login yet</div>'}</div></div><div style="display:flex;gap:5px;align-items:center"><button class="btn btn-warn btn-sm" onclick="openEditCred('emp','${eid}')">Edit Login</button><button class="btn btn-danger btn-sm btn-icon" onclick="removeEmployee(${e.id})">×</button></div></div>`;
 }
 function drvUserRow(d){
-  var u=USERS.find(x=>x.driverId===d.id);
-  return`<div class="drow">
-    <div style="display:flex;align-items:center;gap:11px">
-      <div class="avatar">${ini(d.name)}</div>
-      <div><div style="font-size:13px;font-weight:600">${d.name}</div>
-      <div style="font-size:11px;color:var(--text-secondary)">${d.phone}</div>
-      ${u?`<div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap"><span class="cred-tag">👤 ${u.username}</span><span class="cred-tag">🔑 ${'•'.repeat(Math.min(u.password.length,8))}</span></div>`:'<div style="font-size:10px;color:var(--danger);margin-top:3px">⚠ No login yet</div>'}
-      </div>
-    </div>
-    <button class="btn btn-warn btn-sm" onclick="openEditCred('driver',${d.id})">Edit Login</button>
-  </div>`;
+  var u=USERS.find(x=>(x.driverId||x.driver_id)===d.id);
+  return`<div class="drow"><div style="display:flex;align-items:center;gap:11px"><div class="avatar">${ini(d.name)}</div><div><div style="font-size:13px;font-weight:600">${d.name}</div><div style="font-size:11px;color:var(--text-secondary)">${d.phone}</div>${u?`<div style="margin-top:4px;display:flex;gap:5px;flex-wrap:wrap"><span class="cred-tag">👤 ${u.username}</span><span class="cred-tag">🔑 ${'•'.repeat(Math.min((u.password||'').length,8))}</span></div>`:'<div style="font-size:10px;color:var(--danger);margin-top:3px">⚠ No login yet</div>'}</div></div><button class="btn btn-warn btn-sm" onclick="openEditCred('driver',${d.id})">Edit Login</button></div>`;
 }
 function renderUserEmpList(list){var el=document.getElementById('usr-emp-list');if(!el)return;var c=document.getElementById('emp-count');if(c)c.textContent=list.length;el.innerHTML=list.length?list.map(empUserRow).join(''):'<div class="no-results">No employees found</div>';}
 function renderUserDrvList(list){var el=document.getElementById('usr-drv-list');if(!el)return;var c=document.getElementById('drv-login-count');if(c)c.textContent=list.length;el.innerHTML=list.length?list.map(drvUserRow).join(''):'<div class="no-results">No drivers found</div>';}
 function filterUsers(type,q){
-  var f=q.toLowerCase();
-  updateClear('usr-'+(type==='emp'?'emp':'drv')+'-search',q);
-  if(type==='emp') renderUserEmpList(employees.filter(e=>e.name.toLowerCase().includes(f)||e.empId.toLowerCase().includes(f)||e.dept.toLowerCase().includes(f)));
+  var f=q.toLowerCase(); updateClear('usr-'+(type==='emp'?'emp':'drv')+'-search',q);
+  if(type==='emp') renderUserEmpList(employees.filter(e=>e.name.toLowerCase().includes(f)||(e.empId||e.emp_id||'').toLowerCase().includes(f)||(e.dept||'').toLowerCase().includes(f)));
   else renderUserDrvList(drivers.filter(d=>d.name.toLowerCase().includes(f)||d.phone.includes(f)));
 }
 function openEditCred(type,idVal){
   editCredTarget={type,idVal};
-  var u=null,label='';
-  if(type==='emp'){var e=employees.find(x=>x.empId===idVal);u=USERS.find(x=>x.empId===idVal);label=e?e.name+' ('+idVal+')':'';}
-  else{var d=drivers.find(x=>x.id===idVal);u=USERS.find(x=>x.driverId===idVal);label=d?d.name:'';}
+  var u=null, label='';
+  if(type==='emp'){var e=employees.find(x=>(x.empId||x.emp_id)===idVal);u=USERS.find(x=>(x.empId||x.emp_id)===idVal);label=e?e.name+' ('+idVal+')':'';}
+  else{var d=drivers.find(x=>x.id===idVal);u=USERS.find(x=>(x.driverId||x.driver_id)===idVal);label=d?d.name:'';}
   document.getElementById('edit-cred-info').innerHTML=`<div class="info-box">Editing login for: <strong>${label}</strong></div>`;
   document.getElementById('ec-username').value=u?u.username:'';
   document.getElementById('ec-password').value=u?u.password:'';
   openModal('edit-cred-modal');
 }
-function saveCredentials(){
-  var uname=v('ec-username').toLowerCase(),pass=document.getElementById('ec-password').value.trim();
+async function saveCredentials(){
+  var uname=fv('ec-username').toLowerCase(), pass=document.getElementById('ec-password').value.trim();
   if(!uname||!pass){toast('Username and password required','err');return;}
   var {type,idVal}=editCredTarget;
-  var dup=USERS.find(u=>u.username===uname&&(type==='emp'?u.empId!==idVal:u.driverId!==idVal));
+  var dup=USERS.find(u=>u.username===uname&&((type==='emp'?(u.empId||u.emp_id)!==idVal:(u.driverId||u.driver_id)!==idVal)));
   if(dup){toast('Username already taken','err');return;}
-  var u=type==='emp'?USERS.find(x=>x.empId===idVal):USERS.find(x=>x.driverId===idVal);
-  if(u){u.username=uname;u.password=pass;}
-  else{
-    if(type==='emp'){var e=employees.find(x=>x.empId===idVal);if(e)USERS.push({id:'u'+nextUserId++,username:uname,password:pass,role:'employee',displayName:e.name,empId:e.empId,driverId:null});}
-    else{var d=drivers.find(x=>x.id===idVal);if(d)USERS.push({id:'u'+nextUserId++,username:uname,password:pass,role:'driver',displayName:d.name,empId:null,driverId:d.id});}
-  }
-  closeModal('edit-cred-modal');renderUsers();toast('Credentials updated!','ok');
+  try{
+    if(useSupabase){
+      var existing=type==='emp'?USERS.find(x=>(x.emp_id||x.empId)===idVal):USERS.find(x=>(x.driver_id||x.driverId)===idVal);
+      if(existing){
+        await sb.from('users').update({username:uname,password:pass}).eq('id',existing.id);
+      } else {
+        var extra=type==='emp'?{emp_id:idVal,driver_id:null}:{driver_id:idVal,emp_id:null};
+        var role=type==='emp'?'employee':'driver';
+        var dname=type==='emp'?(employees.find(x=>(x.emp_id||x.empId)===idVal)||{}).name:(drivers.find(x=>x.id===idVal)||{}).name||'';
+        await sb.from('users').insert({username:uname,password:pass,role,display_name:dname,...extra});
+      }
+      await refreshData();
+    } else {
+      var u=type==='emp'?USERS.find(x=>(x.empId||x.emp_id)===idVal):USERS.find(x=>(x.driverId||x.driver_id)===idVal);
+      if(u){u.username=uname;u.password=pass;}
+      else{
+        var role2=type==='emp'?'employee':'driver';
+        var nm=type==='emp'?(employees.find(x=>x.empId===idVal||x.emp_id===idVal)||{}).name:(drivers.find(x=>x.id===idVal)||{}).name||'';
+        var nr={id:'u'+nextUserId++,username:uname,password:pass,role:role2,displayName:nm,display_name:nm};
+        if(type==='emp'){nr.empId=idVal;nr.emp_id=idVal;nr.driverId=null;nr.driver_id=null;}
+        else{nr.driverId=idVal;nr.driver_id=idVal;nr.empId=null;nr.emp_id=null;}
+        USERS.push(nr);
+      }
+    }
+    closeModal('edit-cred-modal'); await renderUsers(); toast('Credentials updated!','ok');
+  } catch(e){ toast('Error: '+e.message,'err'); }
 }
-function removeEmployee(id){
+async function removeEmployee(id){
   if(!confirm('Remove this employee?'))return;
-  var e=employees.find(x=>x.id===id);
-  employees=employees.filter(x=>x.id!==id);
-  if(e)USERS=USERS.filter(u=>u.empId!==e.empId);
-  renderUsers();toast('Employee removed','warn');
+  try{ await dbDeleteEmployee(id); if(useSupabase) await refreshData(); await renderUsers(); toast('Employee removed','warn'); } catch(e){ toast('Error: '+e.message,'err'); }
 }
-function addEmployee(){
-  var name=v('ne-name'),empId=v('ne-empid').toUpperCase(),dept=v('ne-dept'),phone=v('ne-phone');
-  var uname=v('ne-username').toLowerCase(),pass=document.getElementById('ne-password').value;
+async function addEmployee(){
+  var name=fv('ne-name'), empId=fv('ne-empid').toUpperCase(), dept=fv('ne-dept'), phone=fv('ne-phone'), uname=fv('ne-username').toLowerCase(), pass=document.getElementById('ne-password').value;
   if(!name||!empId||!uname||!pass){toast('Name, Emp ID, username & password required','err');return;}
-  if(employees.find(e=>e.empId===empId)){toast('Employee ID already exists','err');return;}
+  if(employees.find(e=>(e.empId||e.emp_id)===empId)){toast('Employee ID already exists','err');return;}
   if(USERS.find(u=>u.username===uname)){toast('Username already taken','err');return;}
-  employees.push({id:nextEmpId++,name,empId,dept,phone});
-  USERS.push({id:'u'+nextUserId++,username:uname,password:pass,role:'employee',displayName:name,empId,driverId:null});
-  closeModal('add-emp-modal');
-  ['ne-name','ne-empid','ne-dept','ne-phone','ne-username','ne-password'].forEach(id=>{var el=document.getElementById(id);if(el)el.value='';});
-  renderUsers();toast(name+' added with login','ok');
+  try{
+    await dbInsertEmployee({name,emp_id:empId,empId,dept,phone});
+    await dbInsertUser({username:uname,password:pass,role:'employee',display_name:name,displayName:name,emp_id:empId,empId,driver_id:null,driverId:null});
+    closeModal('add-emp-modal');
+    ['ne-name','ne-empid','ne-dept','ne-phone','ne-username','ne-password'].forEach(id=>{var el=document.getElementById(id);if(el)el.value='';});
+    if(useSupabase) await refreshData();
+    await renderUsers(); toast(name+' added with login','ok');
+  } catch(e){ toast('Error: '+e.message,'err'); }
 }
 
 // ── MONTHLY TRACKING ──────────────────────────────────────────────
-function renderMonthly(){
+async function renderMonthly(){
   var months=[...new Set(requests.filter(r=>r.month).map(r=>r.month))];
   if(!months.length)months=['May'];
   var sel=months[months.length-1];
@@ -796,17 +1065,21 @@ function renderMonthly(){
 function selMonth(m,el){document.querySelectorAll('.mtab').forEach(t=>t.classList.remove('active'));el.classList.add('active');renderMonthContent(m);}
 function renderMonthContent(month){
   var html=drivers.map(d=>{
-    var trips=requests.filter(r=>r.driver===d.name&&r.month===month);if(!trips.length)return'';
-    var done=trips.filter(r=>r.status==='completed'),km=done.reduce((s,r)=>s+(r.actualKm||0),0);
-    var rows=trips.map(r=>`<div class="trip-row"><span>${r.date} · <span class="emp-id">${r.empId}</span> ${r.name} · ${r.from} → ${r.to} <span class="time-range-badge" style="font-size:9px;padding:1px 6px">🕐 ${r.pickupTime}–${r.dropTime}</span></span><span>${badge(r.status)}${r.actualKm?` <strong>${r.actualKm}km</strong>`:''}</span></div>`).join('');
+    var trips=requests.filter(r=>r.driver===d.name&&r.month===month); if(!trips.length)return'';
+    var done=trips.filter(r=>r.status==='completed'), km=done.reduce((s,r)=>s+(r.actualKm||r.actual_km||0),0);
+    var rows=trips.map(r=>{
+      var ei=r.empId||r.emp_id, pt=r.pickupTime||r.pickup_time, dt=r.dropTime||r.drop_time, fr=r.from||r.from_loc, to=r.to||r.to_loc, akm=r.actualKm||r.actual_km||0;
+      return`<div class="trip-row"><span>${r.date} · <span class="emp-id">${ei}</span> ${r.name} · ${fr} → ${to} <span class="time-range-badge" style="font-size:9px;padding:1px 6px">🕐 ${pt}–${dt}</span></span><span>${badge(r.status)}${akm?` <strong>${akm}km</strong>`:''}</span></div>`;
+    }).join('');
     return`<div class="dm-card"><div class="dm-header"><div class="avatar">${ini(d.name)}</div><div><div style="font-size:14px;font-weight:700">${d.name}</div><div style="font-size:11px;color:var(--text-secondary)">${d.phone} · ${d.license}</div></div></div><div class="dm-stats"><div class="dm-stat"><div class="dm-stat-label">Assigned</div><div class="dm-stat-val">${trips.length}</div></div><div class="dm-stat"><div class="dm-stat-label">Completed</div><div class="dm-stat-val">${done.length}</div></div><div class="dm-stat"><div class="dm-stat-label">Total KM</div><div class="dm-stat-val">${km}</div></div></div><div style="margin-top:.85rem;border-top:1px solid var(--border);padding-top:.6rem">${rows}</div></div>`;
   }).filter(Boolean).join('');
-  document.getElementById('monthly-content').innerHTML=html||`<div class="glass-card"><div class="empty-state"><div class="icon">📅</div><div class="msg">No trips in ${month}</div></div></div>`;
+  var el=document.getElementById('monthly-content');
+  if(el) el.innerHTML=html||`<div class="glass-card"><div class="empty-state"><div class="icon">📅</div><div class="msg">No trips in ${month}</div></div></div>`;
 }
 
 // ── REPORTS ───────────────────────────────────────────────────────
-function renderReports(){
-  var done=requests.filter(r=>r.status==='completed'),km=done.reduce((s,r)=>s+(r.actualKm||0),0),dec=requests.filter(r=>r.status==='declined').length;
+async function renderReports(){
+  var done=requests.filter(r=>r.status==='completed'), km=done.reduce((s,r)=>s+(r.actualKm||r.actual_km||0),0), dec=requests.filter(r=>r.status==='declined').length;
   setPage(`
     <div class="ptitle">Reports</div>
     <div class="psubtitle">Fleet performance analytics</div>
@@ -819,18 +1092,43 @@ function renderReports(){
     <div class="glass-card">
       <div class="ctitle">Driver Performance</div>
       <table class="tbl"><thead><tr><th>Driver</th><th>License</th><th>Trips</th><th>Total KM</th><th>Avg KM / Trip</th></tr></thead>
-      <tbody>${drivers.map(d=>{var t=done.filter(r=>r.driver===d.name),k=t.reduce((s,r)=>s+(r.actualKm||0),0);return`<tr><td style="font-weight:600">${d.name}</td><td class="emp-id">${d.license}</td><td>${t.length}</td><td>${k}</td><td>${t.length?Math.round(k/t.length):'—'}</td></tr>`;}).join('')}</tbody>
+      <tbody>${drivers.map(d=>{var t=done.filter(r=>r.driver===d.name),k=t.reduce((s,r)=>s+(r.actualKm||r.actual_km||0),0);return`<tr><td style="font-weight:600">${d.name}</td><td class="emp-id">${d.license}</td><td>${t.length}</td><td>${k}</td><td>${t.length?Math.round(k/t.length):'—'}</td></tr>`;}).join('')}</tbody>
       </table>
     </div>
     <div class="glass-card">
       <div class="ctitle">Car Utilization</div>
       <table class="tbl"><thead><tr><th>Model</th><th>Reg No.</th><th>Colour</th><th>Trips</th><th>Total KM</th></tr></thead>
-      <tbody>${cars.map(c=>{var t=done.filter(r=>r.car===c.reg),k=t.reduce((s,r)=>s+(r.actualKm||0),0);return`<tr><td style="font-weight:600">${c.model}</td><td class="emp-id">${c.reg}</td><td><span class="color-dot" style="background:${c.hex};margin-right:6px"></span>${c.color}</td><td>${t.length}</td><td>${k}</td></tr>`;}).join('')}</tbody>
+      <tbody>${cars.map(c=>{var t=done.filter(r=>r.car===c.reg),k=t.reduce((s,r)=>s+(r.actualKm||r.actual_km||0),0);return`<tr><td style="font-weight:600">${c.model}</td><td class="emp-id">${c.reg}</td><td><span class="color-dot" style="background:${c.hex};margin-right:6px"></span>${c.color}</td><td>${t.length}</td><td>${k}</td></tr>`;}).join('')}</tbody>
       </table>
     </div>`);
 }
 
-render();
+// ══════════════════════════════════════════════════════════════════
+//  BOOT — initialise Supabase then render
+// ══════════════════════════════════════════════════════════════════
+(async function boot(){
+  // Show loading spinner
+  document.getElementById('root').innerHTML=`<div class="loading-screen"><div class="spinner"></div><div style="font-family:Outfit,sans-serif;font-size:14px;color:var(--text-secondary)">Starting FleetDesk…</div></div>`;
+
+  var configured=initSupabase();
+
+  if(!configured){
+    // Not configured — show setup guide briefly then go to demo login
+    renderSetupGuide();
+    return;
+  }
+
+  // Test the connection
+  try{
+    await refreshData();
+    renderLogin();
+  } catch(e){
+    console.error('Supabase connection failed:',e);
+    useSupabase=false;
+    toast('Could not connect to Supabase — running in demo mode','warn');
+    renderLogin();
+  }
+})();
 </script>
 </body>
 </html>
